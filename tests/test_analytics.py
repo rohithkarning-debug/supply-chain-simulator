@@ -1,6 +1,7 @@
+from enum import Enum
 from types import SimpleNamespace
 
-from scm_sim.analytics import find_delayed_shipments, find_excess, find_low_stock, find_stockouts
+from scm_sim.analytics import find_delayed_shipments, find_excess, find_low_stock, find_stockouts, order_metrics
 
 def ship(shipment_id, expected_day, actual_day=None, sku="A", warehouse_id="W1"):
     return SimpleNamespace(
@@ -83,3 +84,64 @@ def test_empty_stock_gives_empty_results():
     assert find_stockouts({}) == []
     assert find_low_stock({}) == []
     assert find_excess({}) == []
+
+
+class Status(Enum):
+    PENDING = "PENDING"
+    FULFILLED = "FULFILLED"
+    BACKORDERED = "BACKORDERED"
+    CANCELLED = "CANCELLED"
+
+
+def order(order_id, status):
+    return SimpleNamespace(order_id=order_id, status=status)
+
+
+def test_order_metrics_counts_with_string_statuses():
+    orders = [
+        order(1, "PENDING"),
+        order(2, "FULFILLED"),
+        order(3, "FULFILLED"),
+        order(4, "BACKORDERED"),
+        order(5, "CANCELLED"),
+    ]
+    m = order_metrics(orders)
+    assert m["total"] == 5
+    assert m["pending"] == 1
+    assert m["fulfilled"] == 2
+    assert m["backordered"] == 1
+    assert m["cancelled"] == 1
+
+
+def test_order_metrics_accepts_enum_statuses():
+    orders = [order(1, Status.FULFILLED), order(2, Status.PENDING)]
+    m = order_metrics(orders)
+    assert m["fulfilled"] == 1
+    assert m["pending"] == 1
+    assert m["fill_rate"] == 0.5
+
+
+def test_enum_and_string_statuses_can_be_mixed():
+    orders = [order(1, Status.FULFILLED), order(2, "FULFILLED")]
+    assert order_metrics(orders)["fulfilled"] == 2
+
+
+def test_fill_rate_excludes_cancelled_orders():
+    orders = [
+        order(1, "FULFILLED"),
+        order(2, "FULFILLED"),
+        order(3, "PENDING"),
+        order(4, "CANCELLED"),
+    ]
+    assert order_metrics(orders)["fill_rate"] == 0.67
+
+
+def test_fill_rate_is_zero_with_no_orders():
+    m = order_metrics([])
+    assert m["total"] == 0
+    assert m["fill_rate"] == 0.0
+
+
+def test_fill_rate_is_zero_when_all_cancelled():
+    m = order_metrics([order(1, "CANCELLED"), order(2, "CANCELLED")])
+    assert m["fill_rate"] == 0.0

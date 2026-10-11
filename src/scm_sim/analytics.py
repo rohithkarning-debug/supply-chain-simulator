@@ -52,3 +52,29 @@ def find_excess(
         for (wh, sku), qty in stock.items()
         if qty > max_level
     )
+
+
+def order_metrics(orders: list[Any]) -> dict[str, Any]:
+    """Count orders by status and compute the fill rate.
+
+    fill_rate = fulfilled / (total - cancelled), rounded to 2 dp.
+    It is 0.0 when that denominator is 0 (no orders, or all cancelled).
+    """
+    counts = {"PENDING": 0, "FULFILLED": 0, "BACKORDERED": 0, "CANCELLED": 0}
+    for o in orders:
+        status = getattr(o.status, "value", o.status)
+        if status in counts:
+            counts[status] += 1
+
+    total = len(orders)
+    active = total - counts["CANCELLED"]
+    fill_rate = round(counts["FULFILLED"] / active, 2) if active > 0 else 0.0
+
+    return {
+        "total": total,
+        "pending": counts["PENDING"],
+        "fulfilled": counts["FULFILLED"],
+        "backordered": counts["BACKORDERED"],
+        "cancelled": counts["CANCELLED"],
+        "fill_rate": fill_rate,
+    }
