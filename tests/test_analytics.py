@@ -1,8 +1,15 @@
 from enum import Enum
 from types import SimpleNamespace
 
-from scm_sim.analytics import find_delayed_shipments, find_excess, find_low_stock, find_stockouts, order_metrics
-
+from scm_sim.analytics import (
+    build_report,
+    find_delayed_shipments,
+    find_excess,
+    find_low_stock,
+    find_stockouts,
+    format_report,
+    order_metrics,
+)
 def ship(shipment_id, expected_day, actual_day=None, sku="A", warehouse_id="W1"):
     return SimpleNamespace(
         shipment_id=shipment_id,
@@ -145,3 +152,47 @@ def test_fill_rate_is_zero_with_no_orders():
 def test_fill_rate_is_zero_when_all_cancelled():
     m = order_metrics([order(1, "CANCELLED"), order(2, "CANCELLED")])
     assert m["fill_rate"] == 0.0
+
+
+def make_report():
+    stock = {("W1", "A"): 0, ("W1", "B"): 5, ("W2", "A"): 600}
+    shipments = [ship("S1", expected_day=5)]
+    orders = [order(1, "FULFILLED"), order(2, "PENDING")]
+    return build_report(stock, shipments, orders, current_day=8)
+
+
+def test_build_report_has_all_keys():
+    assert set(make_report()) == {
+        "day", "delayed_shipments", "stockouts", "low_stock", "excess", "orders",
+    }
+
+
+def test_build_report_contents():
+    r = make_report()
+    assert r["day"] == 8
+    assert r["stockouts"] == [("W1", "A")]
+    assert r["low_stock"] == [("W1", "B", 5)]
+    assert r["excess"] == [("W2", "A", 600, 100)]
+    assert r["delayed_shipments"][0]["days_late"] == 3
+    assert r["orders"]["fill_rate"] == 0.5
+
+
+def test_build_report_passes_custom_thresholds_through():
+    r = build_report({("W1", "A"): 50}, [], [], 1, reorder_point=60, max_level=40)
+    assert r["low_stock"] == [("W1", "A", 50)]
+    assert r["excess"] == [("W1", "A", 50, 10)]
+
+
+def test_format_report_has_section_headers_and_counts():
+    text = format_report(make_report())
+    for header in ["Delayed shipments (1)", "Stockouts (1)", "Low stock (1)",
+                   "Excess (1)", "Orders (2)"]:
+        assert header in text
+    assert "Day 8" in text
+
+
+def test_format_report_prints_no_issues_for_empty_sections():
+    text = format_report(build_report({}, [], [], current_day=1))
+    assert text.count("No issues") == 4
+    assert "Delayed shipments (0)" in text
+
