@@ -1,0 +1,187 @@
+@startuml class-diagram
+title Supply Chain Management Simulator - Domain Class Diagram
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+hide empty members
+set separator none
+
+package "simulator.py" {
+  class Simulation {
+    +seed : int
+    +reorder_point : int
+    +max_level : int
+    +day : int
+    +inventory : Inventory
+    +orders : OrderManager
+    +shipments : ShipmentManager
+    +history : list[dict]
+    +logs : list[DayLog]
+    -_warehouses : dict[str, int]
+    -_item_supplier : dict[(str, str), str]
+    -_schedule : dict[int, list[ScheduledOrder]]
+    --
+    +Simulation(seed=42, reorder_point=20, max_level=500)
+    +add_supplier(supplier_id, name, lead_time_days=2, reliability=1.0) : Supplier
+    +add_warehouse(warehouse_id, capacity) : None
+    +set_policy(warehouse_id, sku, supplier_id, policy=None) : None
+    +add_stock(warehouse_id, sku, quantity) : int
+    +schedule_order(day, customer_id, warehouse_id, sku, quantity) : None
+    +step() : dict
+    +run(days) : list[dict]
+    +final_summary() : str
+    +all_orders() : list[Order]
+    -_replenish(day) : list[Shipment]
+  }
+  class ScheduledOrder <<frozen dataclass>> {
+    +customer_id : str
+    +warehouse_id : str
+    +sku : str
+    +quantity : int
+  }
+  class DayLog <<dataclass>> {
+    +day : int
+    +delivered : list[Shipment]
+    +fulfilled : list[Order]
+    +backordered : list[Order]
+    +backorders_filled : list[Order]
+    +reorders : list[Shipment]
+  }
+}
+
+package "inventory.py" {
+  class Inventory {
+    -_stock : dict[(str, str), int]
+    -_capacity : dict[str, int]
+    -_policies : dict[(str, str), StockPolicy]
+    --
+    +level(warehouse, sku) : int
+    +add(warehouse, sku, qty) : int
+    +remove(warehouse, sku, qty) : int
+    +is_stockout(warehouse, sku) : bool
+    +register_warehouse(warehouse, capacity) : None
+    +total_in_warehouse(warehouse) : int
+    +set_policy(warehouse, sku, policy) : None
+    +get_policy(warehouse, sku) : StockPolicy
+    +needs_reorder(warehouse, sku) : bool
+    +is_excess(warehouse, sku) : bool
+    +reorder_suggestions() : list[(str, str, int)]
+    +snapshot() : dict[(str, str), int]
+  }
+  class StockPolicy <<frozen dataclass>> {
+    +reorder_point : int = 20
+    +reorder_quantity : int = 100
+    +max_level : int = 500
+  }
+  class InsufficientStockError <<exception>>
+  class CapacityExceededError <<exception>>
+}
+
+package "orders.py" {
+  class OrderManager {
+    +inventory : Inventory
+    -_orders : dict[str, Order]
+    -_next_id : int
+    --
+    +create(customer_id, warehouse_id, sku, quantity, day) : Order
+    +get(order_id) : Order
+    +try_fulfil(order, day) : bool
+    +process_open(day) : list[Order]
+    +cancel(order_id) : Order
+    +by_status(status) : list[Order]
+  }
+  class Order <<dataclass>> {
+    +order_id : str
+    +customer_id : str
+    +warehouse_id : str
+    +sku : str
+    +quantity : int
+    +created_day : int
+    +status : OrderStatus = PENDING
+    +fulfilled_day : int | None
+  }
+  enum OrderStatus {
+    PENDING
+    FULFILLED
+    BACKORDERED
+    CANCELLED
+  }
+}
+
+package "shipments.py" {
+  class ShipmentManager {
+    +inventory : Inventory
+    +rng : random.Random
+    -_suppliers : dict[str, Supplier]
+    -_shipments : dict[str, Shipment]
+    -_next_id : int
+    --
+    +add_supplier(supplier) : None
+    +dispatch(supplier_id, warehouse_id, sku, quantity, day, delay=None) : Shipment
+    +process_arrivals(day) : list[Shipment]
+    +in_transit() : list[Shipment]
+    +delayed(current_day) : list[Shipment]
+  }
+  class Supplier <<dataclass>> {
+    +supplier_id : str
+    +name : str
+    +lead_time_days : int = 2
+    +reliability : float = 1.0
+  }
+  class Shipment <<dataclass>> {
+    +shipment_id : str
+    +supplier_id : str
+    +warehouse_id : str
+    +sku : str
+    +quantity : int
+    +dispatch_day : int
+    +expected_day : int
+    +arrival_day : int
+    +actual_day : int | None
+    +status : ShipmentStatus = IN_TRANSIT
+    --
+    +delay_days : int <<property>>
+    +days_late(current_day) : int
+  }
+  enum ShipmentStatus {
+    IN_TRANSIT
+    DELIVERED
+  }
+}
+
+package "analytics.py" <<module>> {
+  class analytics <<utility>> {
+    +find_delayed_shipments(shipments, current_day) : list[dict]
+    +find_stockouts(stock) : list
+    +find_low_stock(stock, reorder_point=20) : list
+    +find_excess(stock, max_level=500) : list
+    +order_metrics(orders) : dict
+    +build_report(stock, shipments, orders, current_day, reorder_point=20, max_level=500) : dict
+    +format_report(report) : str
+  }
+}
+
+Simulation "1" *-- "1" Inventory
+Simulation "1" *-- "1" OrderManager
+Simulation "1" *-- "1" ShipmentManager
+Simulation "1" *-- "0..*" ScheduledOrder : queues >
+Simulation "1" *-- "0..*" DayLog : logs >
+Simulation ..> analytics : <<uses>>
+
+OrderManager "1" --> "1" Inventory : shares >
+OrderManager "1" *-- "0..*" Order
+Order --> OrderStatus
+
+ShipmentManager "1" --> "1" Inventory : shares >
+ShipmentManager "1" *-- "0..*" Supplier
+ShipmentManager "1" *-- "0..*" Shipment
+Shipment --> ShipmentStatus
+Shipment "0..*" ..> "1" Supplier : supplier_id
+
+Inventory "1" *-- "0..*" StockPolicy : per (warehouse, sku)
+Inventory ..> InsufficientStockError : <<raises>>
+Inventory ..> CapacityExceededError : <<raises>>
+
+DayLog o-- "0..*" Order
+DayLog o-- "0..*" Shipment
+@enduml

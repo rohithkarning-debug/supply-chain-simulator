@@ -1,0 +1,81 @@
+@startuml
+skinparam BoxPadding 10
+skinparam ParticipantPadding 10
+autonumber
+
+actor "Analyst / CLI" as User
+participant "Simulation" as Sim
+participant "OrderManager" as OM
+participant "ShipmentManager" as SM
+participant "Inventory" as Inv
+
+== Day 1: Order Creation and Initial Fulfillment Attempt ==
+User -> Sim: step()
+activate Sim
+
+Sim -> OM: create("C-ACME", "WH-NORTH", "WIDGET", 100, day=1)
+activate OM
+OM --> Sim: Order(order_id="ORD-0001", status=PENDING)
+deactivate OM
+
+Sim -> OM: try_fulfil(order, day=1)
+activate OM
+OM -> Inv: level("WH-NORTH", "WIDGET")
+activate Inv
+Inv --> OM: 20 (current stock)
+deactivate Inv
+
+alt stock >= quantity
+    OM -> Inv: remove("WH-NORTH", "WIDGET", 100)
+    activate Inv
+    Inv --> OM: new level
+    deactivate Inv
+    OM -> OM: status = FULFILLED\nfulfilled_day = 1
+    OM --> Sim: True
+else stock < quantity [Insufficient Stock: 20 < 100]
+    OM -> OM: status = BACKORDERED
+    OM --> Sim: False
+end
+deactivate OM
+
+Sim --> User: Day 1 Report (Orders: 1 Backordered)
+deactivate Sim
+
+== Day 3: Replenishment Arrival and Backorder Resolution ==
+User -> Sim: step()
+activate Sim
+
+note over Sim: Step 1: Process Arriving Shipments
+Sim -> SM: process_arrivals(day=3)
+activate SM
+SM -> Inv: add("WH-NORTH", "WIDGET", 100)
+activate Inv
+Inv --> SM: 120 (new level)
+deactivate Inv
+SM --> Sim: [Shipment(SHP-0001, DELIVERED)]
+deactivate SM
+
+note over Sim: Step 3: Retry Open Backorders (FIFO)
+Sim -> OM: process_open(day=3)
+activate OM
+OM -> OM: sort open orders by (created_day, order_id)
+
+OM -> OM: try_fulfil(order="ORD-0001", day=3)
+activate OM
+OM -> Inv: level("WH-NORTH", "WIDGET")
+activate Inv
+Inv --> OM: 120 (sufficient stock)
+deactivate Inv
+OM -> Inv: remove("WH-NORTH", "WIDGET", 100)
+activate Inv
+Inv --> OM: 20 (new level)
+deactivate Inv
+OM -> OM: status = FULFILLED\nfulfilled_day = 3
+deactivate OM
+
+OM --> Sim: [Order(ORD-0001, status=FULFILLED)]
+deactivate OM
+
+Sim --> User: Day 3 Report (Orders: 1 Newly Fulfilled)
+deactivate Sim
+@enduml
