@@ -2,14 +2,17 @@
 
 Supply Chain Management Simulator: simulates movement of goods from suppliers to warehouses and customers; manages inventory, orders and shipments; flags delays, stockouts and excess inventory.
 
-## Planned modules
+## Modules
 
-- **Inventory** – stock levels per warehouse and SKU
-- **Orders** – customer and replenishment orders
-- **Shipments** – movement of goods between suppliers, warehouses and customers
-- **Suppliers / Warehouses** – network entities and their attributes
-- **Simulation engine** – drives time steps and events through the supply chain
-- **Analytics** – flags delays, stockouts and excess inventory
+| Component | File | Owner | Responsibility |
+|---|---|---|---|
+| Inventory | `src/scm_sim/inventory.py` | Rohith | Stock per (warehouse, SKU), warehouse capacity, stock policies, reorder suggestions, snapshots |
+| Order Manager | `src/scm_sim/orders.py` | Rohanth | Customer orders: create, fulfil, back-order, retry, cancel |
+| Shipment Manager | `src/scm_sim/shipments.py` | Rishi | Suppliers, dispatch, delay model, arrivals, delayed list |
+| Analytics | `src/scm_sim/analytics.py` | Pranav | Detect delays, stockouts, low stock, excess; order metrics; build/format report |
+| Simulation Engine | `src/scm_sim/simulator.py` | Rohith | Scenario setup, daily step, automatic replenishment, demo scenario |
+| CLI | `src/scm_sim/__main__.py` | Rohith | Command-line entry point |
+| CI Pipeline | `.github/workflows/ci.yml` | Rohith | Run all tests on every push/PR; required check for merging |
 
 ## Setup
 
@@ -101,6 +104,13 @@ replenishments, then record the day's analytics report. `__main__.py` exposes th
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the team workflow (feature branches, pull requests, reviews and CI).
 
-## docs/
+## Documentation
 
-Project documentation will live in `docs/`. The SRS (Software Requirements Specification), SAD (Software Architecture Document) and Test Plan will be added there.
+| Path | Contents |
+|---|---|
+| [`docs/requirements-registry.md`](docs/requirements-registry.md) | Fixed IDs for all requirements (SCM-F, SCM-NF, SCM-SO, SCM-SR) and test cases (TC-…) |
+| [`docs/srs/`](docs/srs/) | Software Requirements Specification, one Markdown file per section |
+| [`docs/sad/`](docs/sad/) | Software Architecture Document, one Markdown file per section |
+| [`docs/testplan/`](docs/testplan/) | Test Plan sections, with one file per test case in `test-cases/` |
+| [`docs/diagrams/`](docs/diagrams/) | PlantUML sources (`.puml`) and rendered images (`.png`) |
+| [`docs/final/`](docs/final/) | Assembled SRS, SAD and Test Plan `.docx` files for submission |
