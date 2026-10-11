@@ -1,0 +1,56 @@
+@startuml component-diagram
+title Supply Chain Management Simulator - Component Diagram
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam defaultFontName Arial
+left to right direction
+
+actor "Supply Chain Analyst /\nInstructor" as user
+actor "Developer" as dev
+
+package "scm_sim (src/scm_sim/)" {
+  package "Presentation layer" {
+    component "CLI\n<<~__main~__.py>>\nmain(argv)" as CLI
+  }
+  package "Orchestration layer" {
+    component "Simulation Engine\n<<simulator.py>>\nSimulation, build_demo" as SIM
+  }
+  package "Domain layer" {
+    component "Order Manager\n<<orders.py>>\nOrderManager" as ORD
+    component "Shipment Manager\n<<shipments.py>>\nShipmentManager" as SHP
+    component "Inventory\n<<inventory.py>>\nInventory, StockPolicy" as INV
+  }
+  package "Analytics layer" {
+    component "Analytics\n<<analytics.py>>\npure functions" as ANA
+  }
+}
+
+package "GitHub" {
+  component "CI Pipeline\n<<.github/workflows/ci.yml>>\njob: test" as CI
+  folder "tests/\n(pytest suite)" as TESTS
+}
+
+user --> CLI : python -m scm_sim\n~--days N ~--seed S
+CLI --> SIM : build_demo(seed)\nrun(days), final_summary()
+SIM --> INV : setup, reorder_suggestions(),\nsnapshot()
+SIM --> ORD : create(), try_fulfil(),\nprocess_open(), by_status()
+SIM --> SHP : add_supplier(), dispatch(),\nprocess_arrivals(), in_transit(), delayed()
+SIM --> ANA : build_report(),\nformat_report()
+ORD --> INV : level(), remove()
+SHP --> INV : add()
+
+dev --> CI : push / pull request
+CI --> TESTS : pytest -v ~--cov=scm_sim
+TESTS ..> CLI : <<tests>>
+TESTS ..> SIM : <<tests>>
+TESTS ..> ORD : <<tests>>
+TESTS ..> SHP : <<tests>>
+TESTS ..> INV : <<tests>>
+TESTS ..> ANA : <<tests>>
+
+note bottom of ANA
+  Reads plain data only
+  (stock snapshot, shipments, orders);
+  never changes state, imports no other module.
+end note
+@enduml
