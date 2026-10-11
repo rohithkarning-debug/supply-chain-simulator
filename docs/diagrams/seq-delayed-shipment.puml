@@ -1,0 +1,77 @@
+﻿@startuml
+skinparam BoxPadding 10
+skinparam ParticipantPadding 10
+autonumber
+
+box "Simulation Engine" #F9F9F9
+participant "sim : Simulation" as Sim
+end box
+
+box "Domain Modules" #EFF8FF
+participant "inv : Inventory" as Inv
+participant "shipments : ShipmentManager" as SM
+participant "s : Shipment\n(SHP-0001)" as Shp
+end box
+
+box "Analytics Subsystem" #F5FFF5
+participant "analytics" as Analytics
+end box
+
+== Day 1: Automated Replenishment & Dispatch ==
+
+Sim -> Inv : reorder_suggestions()
+Inv --> Sim : [("WH-NORTH", "WIDGET", 100)]
+note over Sim : Check in-transit (none)\nTrim to capacity (100)
+
+Sim -> SM : dispatch("SUP-FLAKY", "WH-NORTH", "WIDGET", 100, day=1)
+activate SM
+note over SM : expected_day = 1 + 2 = 3\nrng.random() > 0.3 -> delay = 2\narrival_day = 3 + 2 = 5
+SM -> Shp ** : create(expected_day=3, arrival_day=5, status=IN_TRANSIT)
+SM --> Sim : shp (SHP-0001)
+deactivate SM
+
+== Day 2 & Day 3: Simulation Stepping & Expected Date ==
+
+Sim -> SM : process_arrivals(day=3)
+SM --> Sim : [] (arrival_day 5 > 3; still in transit)
+
+Sim -> SM : delayed(current_day=3)
+SM -> Shp : days_late(3)
+note over Shp : max(0, 3 - 3) = 0
+SM --> Sim : [] (on schedule)
+
+== Day 4: In-Transit Delay Accrues & Detection ==
+
+Sim -> SM : process_arrivals(day=4)
+SM --> Sim : [] (arrival_day 5 > 4; still in transit)
+
+Sim -> SM : delayed(current_day=4)
+SM -> Shp : days_late(4)
+note over Shp : max(0, 4 - 3) = 1 day late!\n(IN_TRANSIT late)
+SM --> Sim : [SHP-0001]
+
+Sim -> Analytics : build_report(stock, shipments, orders, current_day=4)
+Analytics -> Analytics : find_delayed_shipments(shipments, 4)
+Analytics --> Sim : report (delayed_shipments: [{id: "SHP-0001", days_late: 1}])
+note over Sim : Daily report flags SHP-0001 as delayed!
+
+== Day 5: Late Arrival & Physical Delivery ==
+
+Sim -> SM : process_arrivals(day=5)
+activate SM
+note over SM : arrival_day 5 <= 5 -> Due!
+SM -> Inv : add("WH-NORTH", "WIDGET", 100)
+Inv --> SM : new_level = 100
+SM -> Shp : set status=DELIVERED, actual_day=5
+SM --> Sim : [SHP-0001]
+deactivate SM
+
+Sim -> SM : delayed(current_day=5)
+SM -> Shp : days_late(5)
+note over Shp : actual_day - expected_day = 5 - 3 = 2\n(DELIVERED late)
+SM --> Sim : [SHP-0001]
+
+Sim -> Analytics : build_report(stock, shipments, orders, current_day=5)
+Analytics --> Sim : report (delayed_shipments: [{id: "SHP-0001", days_late: 2}])
+note over Sim : Report reflects 2 days historical delay
+@enduml
