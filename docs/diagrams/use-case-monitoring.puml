@@ -1,0 +1,65 @@
+@startuml
+' Use-case diagram 2: Monitoring & quality
+' Supply Chain Management Simulator - SRS section 7.1 (b)
+
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #F5FFF5
+skinparam actorBackgroundColor #EFF8FF
+skinparam rectangleBackgroundColor #FAFAFA
+
+title Use-Case Diagram 2: Monitoring & Quality
+
+actor "Supply Chain Analyst" as Analyst
+actor "Instructor /\nEvaluator" as Instructor
+actor "Developer" as Dev
+
+rectangle "Supply Chain Management Simulator" {
+
+  usecase "View daily report" as UC9
+  usecase "Detect delays" as UC10
+  usecase "Detect stockouts" as UC11
+  usecase "Detect excess" as UC12
+  usecase "View fill rate" as UC13
+
+  usecase "Run tests" as UC14
+  usecase "Open PR" as UC15
+  usecase "Review PR" as UC16
+}
+
+' --- monitoring: the analyst reads the daily analytics report ---
+Analyst -- UC9
+UC9 ..> UC10 : <<include>>
+UC9 ..> UC11 : <<include>>
+UC9 ..> UC12 : <<include>>
+UC9 ..> UC13 : <<include>>
+
+' --- the evaluator inspects the same reports to assess the system ---
+Instructor -- UC9
+Instructor -- UC10
+Instructor -- UC13
+
+' --- development pipeline activities ---
+Dev -- UC14
+Dev -- UC15
+Dev -- UC16
+Instructor -- UC14
+UC15 ..> UC16 : <<extend>>\n[another team member reviews]
+UC14 ..> UC15 : <<include>>
+
+note bottom of UC9
+  Report sections: delayed shipments,
+  stockouts, low stock, excess and
+  order metrics. Empty sections are
+  printed as "No issues".
+end note
+
+note right of Dev
+  The "run tests -> open PR -> review PR"
+  chain models the protected-main
+  development pipeline, not a runtime
+  feature of the simulator.
+end note
+
+@enduml
