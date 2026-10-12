@@ -1,0 +1,68 @@
+@startuml
+' Use-case diagram 1: Simulation operations
+' Supply Chain Management Simulator - SRS section 7.1 (a)
+
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #F5FFF5
+skinparam actorBackgroundColor #EFF8FF
+skinparam rectangleBackgroundColor #FAFAFA
+
+title Use-Case Diagram 1: Simulation Operations
+
+actor "Supply Chain Analyst" as Analyst
+actor "System timer\n(daily step)" as Timer #EFF8FF
+actor "Instructor /\nEvaluator" as Instructor
+
+rectangle "Supply Chain Management Simulator" {
+
+  usecase "Configure scenario" as UC1
+  usecase "Schedule orders" as UC2
+  usecase "Run simulation" as UC3
+  usecase "Step one day" as UC4
+  usecase "Fulfil orders" as UC5
+  usecase "Back-order" as UC6
+  usecase "Dispatch replenishment" as UC7
+  usecase "Receive shipment" as UC8
+}
+
+' --- primary actor relationships ---
+Analyst -- UC1
+Analyst -- UC2
+Analyst -- UC3
+
+Instructor -- UC3
+Instructor -- UC1
+
+' --- secondary actor: the daily time-step ---
+Timer -- UC4
+
+' --- internal steps of one simulated day ---
+UC4 ..> UC8 : <<include>>
+UC4 ..> UC5 : <<include>>
+UC4 ..> UC6 : <<include>>
+UC4 ..> UC7 : <<include>>
+
+' --- scenario setup builds on configuring the scenario ---
+UC3 ..> UC4 : <<include>>
+UC4 ..> UC2 : <<include>>
+
+' --- replenishment can be back-ordered until it arrives ---
+UC5 ..> UC6 : <<extend>>\n[stock < quantity]
+UC7 ..> UC8 : <<extend>>\n[arrival_day reached]
+
+note bottom of Timer
+  Secondary actor: advances the discrete
+  daily time-step in the fixed order
+  arrivals -> today's orders -> back-order
+  retry -> replenishment -> report
+end note
+
+note right of Analyst
+  Primary user of the simulator.
+  Supplier, Warehouse and Customer
+  are simulated entities, not actors.
+end note
+
+@enduml
