@@ -1,4 +1,4 @@
-"""Command-line entry point: ``python -m scm_sim --days 10 --seed 42``."""
+"""Command-line entry point: ``scm-sim --days 10 --seed 42`` (or ``python -m scm_sim``)."""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +10,7 @@ from scm_sim.simulator import build_demo, describe_day
 def main(argv: Optional[List[str]] = None) -> int:
     """Run the demo scenario, print a day-by-day summary and the final report."""
     parser = argparse.ArgumentParser(
-        prog="scm_sim", description="Run the Supply Chain Management Simulator demo."
+        prog="scm-sim", description="Run the Supply Chain Management Simulator demo."
     )
     parser.add_argument("--days", type=int, default=10, help="days to simulate (default 10)")
     parser.add_argument("--seed", type=int, default=42, help="random seed (default 42)")
