@@ -28,17 +28,21 @@ pytest
 
 ## How to run
 
-The package lives in `src/`, so either run from there or put it on `PYTHONPATH`:
+Install the package once (editable, so code changes take effect immediately):
 
 ```bash
-cd src
-python -m scm_sim --days 10 --seed 42
+pip install -e .
 ```
 
-```powershell
-# from the repo root (PowerShell); use `PYTHONPATH=src python -m scm_sim` in bash
-$env:PYTHONPATH = "src"; python -m scm_sim --days 10 --seed 42
+Then run the demo with one command:
+
+```bash
+scm-sim --days 10 --seed 42
 ```
+
+`python -m scm_sim --days 10 --seed 42` also works after installing. Without installing, run it
+from the source tree with `PYTHONPATH=src python -m scm_sim` (bash) or
+`$env:PYTHONPATH = "src"; python -m scm_sim` (PowerShell).
 
 `--days` (default 10) sets how long to simulate; `--seed` (default 42) fixes the random
 shipment delays, so the same seed always gives the same output.

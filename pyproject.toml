@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scm-sim"
+version = "1.0.0"
+description = "Supply Chain Management Simulator: day-by-day simulation of inventory, orders and shipments"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Rohith Karning" },
+    { name = "Rohanth Ganesha C" },
+    { name = "Rishi J Mule" },
+    { name = "Pranav Achar" },
+]
+# No runtime dependencies: the simulator uses only the standard library (SCM-NF-004).
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "pytest-cov>=5.0"]
+
+[project.scripts]
+scm-sim = "scm_sim.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
