@@ -107,3 +107,18 @@ def test_cancel_rules():
     
     with pytest.raises(ValueError, match="Cannot cancel an already fulfilled order"):
         mgr.cancel(o2.order_id)
+
+
+def test_rejected_order_does_not_consume_an_id():
+    """SAD 4.6 L3: a rejected create() must not leave a gap in the ORD-NNNN sequence."""
+    inv = Inventory()
+    om = OrderManager(inv)
+    with pytest.raises(ValueError, match="quantity must be greater than 0"):
+        om.create("C1", "WH1", "SKU1", 0, day=1)
+    with pytest.raises(ValueError):
+        om.create("C1", "WH1", "SKU1", -5, day=1)
+    first = om.create("C1", "WH1", "SKU1", 10, day=1)
+    second = om.create("C2", "WH1", "SKU1", 5, day=1)
+    assert first.order_id == "ORD-0001"
+    assert second.order_id == "ORD-0002"
+    assert [o.order_id for o in om.by_status(OrderStatus.PENDING)] == ["ORD-0001", "ORD-0002"]

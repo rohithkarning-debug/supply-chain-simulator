@@ -33,7 +33,16 @@ class OrderManager:
         self._next_id = 1
         
     def create(self, customer_id: str, warehouse_id: str, sku: str, quantity: int, day: int) -> Order:
-        """Creates a new order and assigns it an ID."""
+        """Creates a new order and assigns it an ID.
+
+        The quantity is validated before an ID is allocated, so a rejected call
+        leaves the ORD-NNNN sequence contiguous (SAD 4.6 L3).
+
+        Raises:
+            ValueError: If quantity <= 0.
+        """
+        if quantity <= 0:
+            raise ValueError("Order quantity must be greater than 0.")
         order_id = f"ORD-{self._next_id:04d}"
         self._next_id += 1
         order = Order(
