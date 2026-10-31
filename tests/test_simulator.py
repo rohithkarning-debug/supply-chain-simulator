@@ -130,3 +130,34 @@ def test_cli_runs_as_module():
     )
     assert result.returncode == 0, result.stderr
     assert "=== Supply Chain Report: Day 10 ===" in result.stdout
+
+
+def test_older_backorder_is_served_before_new_order_on_same_day():
+    """Issue #27 / SAD 4.6 L4: back-orders are retried before today's new orders.
+
+    Day 1: C1 wants 60 but only 30 are in stock -> back-ordered.
+    Day 2: a 50-unit shipment arrives (stock 80) and C2 orders 40 the same day.
+    Oldest-first: C1's 60 is filled first (stock 20), so C2's 40 is back-ordered.
+    The old order (new orders first) would have filled C2 and kept C1 waiting.
+    """
+    sim = Simulation(seed=1)
+    sim.add_supplier("SUP", "Reliable", lead_time_days=1, reliability=1.0)
+    sim.add_warehouse("WH", capacity=1000)
+    # reorder point 0 so the simulation never dispatches its own replenishment
+    sim.set_policy("WH", "SKU", "SUP", StockPolicy(0, 100, 500))
+    sim.add_stock("WH", "SKU", 30)
+    sim.schedule_order(1, "C1", "WH", "SKU", 60)
+    sim.step()
+    first = sim.orders.get("ORD-0001")
+    assert first.status == OrderStatus.BACKORDERED
+
+    sim.shipments.dispatch("SUP", "WH", "SKU", 50, day=1)  # arrives day 2
+    sim.schedule_order(2, "C2", "WH", "SKU", 40)
+    sim.step()
+    second = sim.orders.get("ORD-0002")
+
+    assert first.status == OrderStatus.FULFILLED and first.fulfilled_day == 2
+    assert second.status == OrderStatus.BACKORDERED
+    assert sim.inventory.level("WH", "SKU") == 20
+    assert [o.order_id for o in sim.logs[1].backorders_filled] == ["ORD-0001"]
+    assert [o.order_id for o in sim.logs[1].backordered] == ["ORD-0002"]
