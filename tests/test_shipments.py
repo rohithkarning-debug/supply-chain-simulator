@@ -231,3 +231,30 @@ def test_probabilistic_delay_with_zero_reliability():
         shp = mgr.dispatch("SUP-SLOW", "WH-01", "SKU-01", quantity=10, day=day)
         delay = shp.arrival_day - shp.expected_day
         assert 1 <= delay <= 3
+
+
+def test_capacity_breach_does_not_abort_other_arrivals():
+    """SAD 4.6 L2: one shipment that does not fit must not stop the rest of the day's deliveries."""
+    inv = Inventory()
+    inv.register_warehouse("WH-01", 50)
+    inv.add("WH-01", "SKU", 45)
+    mgr = ShipmentManager(inv, rng=random.Random(1))
+    mgr.add_supplier(Supplier("SUP", "Reliable", lead_time_days=1, reliability=1.0))
+    shipment_a = mgr.dispatch("SUP", "WH-01", "SKU", 10, day=0)  # 45 + 10 > 50 -> blocks
+    shipment_b = mgr.dispatch("SUP", "WH-01", "SKU", 5, day=0)   # 45 + 5 <= 50 -> fits
+
+    delivered = mgr.process_arrivals(1)
+
+    assert delivered == [shipment_b]
+    assert shipment_b.status == ShipmentStatus.DELIVERED
+    assert shipment_a.status == ShipmentStatus.IN_TRANSIT and shipment_a.actual_day is None
+    assert inv.level("WH-01", "SKU") == 50
+    assert mgr.last_blocked == [shipment_a]
+    assert shipment_a in mgr.delayed(2)  # still pending after its arrival day -> reported late
+
+    # Once space is freed, the blocked shipment is delivered on the next call.
+    inv.remove("WH-01", "SKU", 20)
+    assert mgr.process_arrivals(2) == [shipment_a]
+    assert mgr.last_blocked == []
+    assert shipment_a.status == ShipmentStatus.DELIVERED
+    assert shipment_a.actual_day == 2 and inv.level("WH-01", "SKU") == 40
