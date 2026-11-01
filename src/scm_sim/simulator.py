@@ -35,6 +35,7 @@ class DayLog:
 
     day: int
     delivered: List[Shipment] = field(default_factory=list)
+    blocked: List[Shipment] = field(default_factory=list)
     fulfilled: List[Order] = field(default_factory=list)
     backordered: List[Order] = field(default_factory=list)
     backorders_filled: List[Order] = field(default_factory=list)
@@ -145,6 +146,7 @@ class Simulation:
         log = DayLog(day)
 
         log.delivered = self.shipments.process_arrivals(day)
+        log.blocked = list(self.shipments.last_blocked)
 
         log.backorders_filled = self.orders.process_open(day)
 
@@ -237,6 +239,11 @@ def describe_day(log: DayLog, report: Report) -> str:
     for s in log.delivered:
         late = f", {s.delay_days} day(s) late" if s.delay_days else ""
         lines.append(f"  arrived   {s.shipment_id}: {s.quantity} {s.sku} -> {s.warehouse_id}{late}")
+    for s in log.blocked:
+        lines.append(
+            f"  BLOCKED   {s.shipment_id}: {s.quantity} {s.sku} -> {s.warehouse_id}, "
+            f"no capacity; retry tomorrow"
+        )
     for o in log.backorders_filled:
         lines.append(
             f"  filled    {o.order_id}: back-order from day {o.created_day} now shipped"
