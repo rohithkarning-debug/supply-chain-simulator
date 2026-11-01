@@ -64,9 +64,9 @@ Day 3:
 ...
 Day 5:
   arrived   SHP-0001: 120 GADGET -> WH-SOUTH, 1 day(s) late
+  filled    ORD-0005: back-order from day 3 now shipped
   fulfilled ORD-0008: 20 WIDGET from WH-NORTH
   fulfilled ORD-0009: 25 GADGET from WH-SOUTH
-  filled    ORD-0005: back-order from day 3 now shipped
   reorder   SHP-0003: 150 WIDGET from SUP-RELIABLE -> WH-NORTH, due day 7
   flags: 1 delayed, 0 stockout, 2 low, 1 excess | fill rate 1.0
 ...
@@ -101,7 +101,7 @@ suppliers add stock when they arrive, with delays drawn from a seeded random gen
 `analytics` (**Pranav Achar**) is a set of pure functions that turn plain data (a stock snapshot,
 shipments and orders) into a report of delays, stockouts, low stock, excess and fill rate.
 `Simulation` in `simulator.py` (integration: **Rohith**) owns all of these and drives them one day
-at a time: deliver arrivals, then serve today's orders, then retry back-orders, then dispatch
+at a time: deliver arrivals, then retry back-orders (oldest first), then serve today's orders, then dispatch
 replenishments, then record the day's analytics report. `__main__.py` exposes this as a CLI.
 
 ## Contributing

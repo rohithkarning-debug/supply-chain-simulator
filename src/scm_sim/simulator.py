@@ -1,8 +1,9 @@
 """Day-by-day simulation engine that wires inventory, orders, shipments and analytics together.
 
 Each call to :meth:`Simulation.step` advances the clock by one day and runs the
-supply chain in a fixed order: receive arrivals, serve today's demand, retry
-back-orders, replenish low stock, then record an analytics report.
+supply chain in a fixed order: receive arrivals, retry back-orders (oldest
+first), serve today's demand, replenish low stock, then record an analytics
+report.
 """
 from __future__ import annotations
 
@@ -132,8 +133,9 @@ class Simulation:
 
         Order of events:
             1. deliver shipments arriving today into inventory
-            2. create today's customer orders and try to fulfil each
-            3. retry open back-orders (oldest first)
+            2. retry open back-orders (oldest first), so earlier customers
+               are served before today's new demand (issue #27, SAD 4.6 L4)
+            3. create today's customer orders and try to fulfil each
             4. dispatch a replenishment for each item needing a reorder
                that has nothing already in transit
             5. build and store the analytics report
@@ -144,6 +146,8 @@ class Simulation:
 
         log.delivered = self.shipments.process_arrivals(day)
 
+        log.backorders_filled = self.orders.process_open(day)
+
         for demand in self._schedule.pop(day, []):
             order = self.orders.create(
                 demand.customer_id, demand.warehouse_id, demand.sku, demand.quantity, day
@@ -152,8 +156,6 @@ class Simulation:
                 log.fulfilled.append(order)
             else:
                 log.backordered.append(order)
-
-        log.backorders_filled = self.orders.process_open(day)
 
         log.reorders = self._replenish(day)
 
@@ -235,14 +237,14 @@ def describe_day(log: DayLog, report: Report) -> str:
     for s in log.delivered:
         late = f", {s.delay_days} day(s) late" if s.delay_days else ""
         lines.append(f"  arrived   {s.shipment_id}: {s.quantity} {s.sku} -> {s.warehouse_id}{late}")
-    for o in log.fulfilled:
-        lines.append(f"  fulfilled {o.order_id}: {o.quantity} {o.sku} from {o.warehouse_id}")
-    for o in log.backordered:
-        lines.append(f"  BACKORDER {o.order_id}: {o.quantity} {o.sku} from {o.warehouse_id}")
     for o in log.backorders_filled:
         lines.append(
             f"  filled    {o.order_id}: back-order from day {o.created_day} now shipped"
         )
+    for o in log.fulfilled:
+        lines.append(f"  fulfilled {o.order_id}: {o.quantity} {o.sku} from {o.warehouse_id}")
+    for o in log.backordered:
+        lines.append(f"  BACKORDER {o.order_id}: {o.quantity} {o.sku} from {o.warehouse_id}")
     for s in log.reorders:
         lines.append(
             f"  reorder   {s.shipment_id}: {s.quantity} {s.sku} from {s.supplier_id} "
