@@ -9,7 +9,7 @@ from enum import Enum
 import random
 from typing import Dict, List, Optional
 
-from scm_sim.inventory import Inventory
+from scm_sim.inventory import CapacityExceededError, Inventory
 
 
 class ShipmentStatus(str, Enum):
@@ -104,6 +104,7 @@ class ShipmentManager:
         self._suppliers: Dict[str, Supplier] = {}
         self._shipments: Dict[str, Shipment] = {}
         self._next_id: int = 1
+        self.last_blocked: List[Shipment] = []
 
     def add_supplier(self, supplier: Supplier) -> None:
         """Register a new supplier.
@@ -177,13 +178,23 @@ class ShipmentManager:
         For each arriving shipment, adds quantity to inventory, updates status
         to DELIVERED, and records actual_day.
 
+        A shipment that would push its warehouse past capacity is not delivered:
+        it stays IN_TRANSIT (so it is retried on the next call and is reported
+        as delayed by analytics) and is listed in ``last_blocked``. The remaining
+        due shipments are still delivered (SAD 4.6 L2).
+
         Returns:
             List of shipments delivered today.
         """
         delivered_today: List[Shipment] = []
+        self.last_blocked = []
         for shipment in self._shipments.values():
             if shipment.status == ShipmentStatus.IN_TRANSIT and shipment.arrival_day <= day:
-                self.inventory.add(shipment.warehouse_id, shipment.sku, shipment.quantity)
+                try:
+                    self.inventory.add(shipment.warehouse_id, shipment.sku, shipment.quantity)
+                except CapacityExceededError:
+                    self.last_blocked.append(shipment)
+                    continue
                 shipment.status = ShipmentStatus.DELIVERED
                 shipment.actual_day = day
                 delivered_today.append(shipment)

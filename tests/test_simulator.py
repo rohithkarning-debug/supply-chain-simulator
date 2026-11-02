@@ -9,7 +9,7 @@ from scm_sim.__main__ import main
 from scm_sim.inventory import StockPolicy
 from scm_sim.orders import OrderStatus
 from scm_sim.shipments import ShipmentStatus
-from scm_sim.simulator import Simulation, build_demo
+from scm_sim.simulator import Simulation, build_demo, describe_day
 
 SRC = Path(__file__).resolve().parents[1] / "src"
 
@@ -161,3 +161,26 @@ def test_older_backorder_is_served_before_new_order_on_same_day():
     assert sim.inventory.level("WH", "SKU") == 20
     assert [o.order_id for o in sim.logs[1].backorders_filled] == ["ORD-0001"]
     assert [o.order_id for o in sim.logs[1].backordered] == ["ORD-0002"]
+
+
+def test_blocked_arrival_is_logged_and_delivered_once_space_frees():
+    """SAD 4.6 L2: a shipment that does not fit is shown as BLOCKED, not lost, and the day continues."""
+    sim = Simulation(seed=1)
+    sim.add_supplier("SUP", "Reliable", lead_time_days=1, reliability=1.0)
+    sim.add_warehouse("WH", capacity=100)
+    sim.set_policy("WH", "SKU", "SUP", StockPolicy(0, 10, 100))  # never auto-reorders
+    sim.add_stock("WH", "SKU", 90)
+    # Dispatched directly, bypassing the Simulation's own capacity trimming.
+    shipment = sim.shipments.dispatch("SUP", "WH", "SKU", 30, day=0)
+    sim.schedule_order(1, "C1", "WH", "SKU", 10)
+
+    report = sim.step()  # day 1: 90 + 30 > 100 -> blocked; order still fulfilled
+    assert sim.logs[0].blocked == [shipment] and sim.logs[0].delivered == []
+    assert [o.order_id for o in sim.logs[0].fulfilled] == ["ORD-0001"]
+    assert "BLOCKED   SHP-0001" in describe_day(sim.logs[0], report)
+
+    sim.schedule_order(2, "C2", "WH", "SKU", 30)
+    sim.step()  # day 2: arrivals run first, still 80 + 30 > 100 -> blocked again
+    sim.step()  # day 3: stock 50 after C2's order, so the 30 units now fit
+    assert sim.logs[2].delivered == [shipment] and sim.logs[2].blocked == []
+    assert sim.inventory.level("WH", "SKU") == 80
