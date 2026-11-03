@@ -55,10 +55,11 @@ class Simulation:
 
         Args:
             seed: Seed for the shipment-delay random number generator.
-            reorder_point: Low-stock threshold used in analytics reports.
-            max_level: Excess-stock threshold used in analytics reports.
-                (Analytics takes one global threshold; per-item policies still
-                drive the actual reorder decisions.)
+            reorder_point: Fallback low-stock threshold for analytics, used
+                only for items that have no stock policy.
+            max_level: Fallback excess-stock threshold for analytics, used
+                only for items that have no stock policy. Items with a policy
+                are judged against their own thresholds (SAD 4.6 L1).
         """
         self.seed = seed
         self.reorder_point = reorder_point
@@ -161,14 +162,7 @@ class Simulation:
 
         log.reorders = self._replenish(day)
 
-        report = build_report(
-            self.inventory.snapshot(),
-            self.shipments.delayed(day),
-            self.all_orders(),
-            day,
-            reorder_point=self.reorder_point,
-            max_level=self.max_level,
-        )
+        report = self._build_report(day)
         self.history.append(report)
         self.logs.append(log)
         return report
@@ -181,14 +175,7 @@ class Simulation:
 
     def final_summary(self) -> str:
         """Return the latest report formatted by analytics' ``format_report``."""
-        report = self.history[-1] if self.history else build_report(
-            self.inventory.snapshot(),
-            self.shipments.delayed(self.day),
-            self.all_orders(),
-            self.day,
-            reorder_point=self.reorder_point,
-            max_level=self.max_level,
-        )
+        report = self.history[-1] if self.history else self._build_report(self.day)
         return format_report(report)
 
     def all_orders(self) -> List[Order]:
@@ -197,6 +184,23 @@ class Simulation:
         return sorted(orders, key=lambda o: o.order_id)
 
     # ----- internals -------------------------------------------------------
+
+    def _build_report(self, day: int) -> Report:
+        """Build the analytics report for ``day`` using each item's own stock policy."""
+        stock = self.inventory.snapshot()
+        policies = {
+            (wh, sku): self.inventory.get_policy(wh, sku)
+            for wh, sku in set(stock) | set(self._item_supplier)
+        }
+        return build_report(
+            stock,
+            self.shipments.delayed(day),
+            self.all_orders(),
+            day,
+            reorder_point=self.reorder_point,
+            max_level=self.max_level,
+            policies=policies,
+        )
 
     def _replenish(self, day: int) -> List[Shipment]:
         """Dispatch one replenishment per item that needs it and has none in transit.

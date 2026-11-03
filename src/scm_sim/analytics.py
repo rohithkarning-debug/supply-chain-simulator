@@ -1,7 +1,11 @@
 """Analytics over plain data: delays, stock problems, order metrics, reports."""
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping, Optional
+
+# Anything with ``reorder_point`` and ``max_level`` attributes, e.g. inventory.StockPolicy.
+# Typed as Any so analytics keeps no dependency on the inventory module.
+Policies = Optional[Mapping[tuple[str, str], Any]]
 
 
 def find_delayed_shipments(shipments: list[Any], current_day: int) -> list[dict[str, Any]]:
@@ -29,29 +33,42 @@ def find_stockouts(stock: dict[tuple[str, str], int]) -> list[tuple[str, str]]:
     return sorted(key for key, qty in stock.items() if qty == 0)
 
 
+def _threshold(policies: Policies, key: tuple[str, str], name: str, default: int) -> int:
+    """Return the item's own threshold from ``policies``, or ``default`` if it has none."""
+    if policies is not None and key in policies:
+        return getattr(policies[key], name)
+    return default
+
+
 def find_low_stock(
-    stock: dict[tuple[str, str], int], reorder_point: int = 20
+    stock: dict[tuple[str, str], int], reorder_point: int = 20, policies: Policies = None
 ) -> list[tuple[str, str, int]]:
-    """Return (warehouse_id, sku, qty) with 0 < qty <= reorder_point, sorted."""
+    """Return (warehouse_id, sku, qty) with 0 < qty <= reorder point, sorted.
+
+    The reorder point is the item's own ``policies[(wh, sku)].reorder_point``
+    when given, otherwise the global ``reorder_point`` (SAD 4.6 L1).
+    """
     return sorted(
         (wh, sku, qty)
         for (wh, sku), qty in stock.items()
-        if 0 < qty <= reorder_point
+        if 0 < qty <= _threshold(policies, (wh, sku), "reorder_point", reorder_point)
     )
 
 
 def find_excess(
-    stock: dict[tuple[str, str], int], max_level: int = 500
+    stock: dict[tuple[str, str], int], max_level: int = 500, policies: Policies = None
 ) -> list[tuple[str, str, int, int]]:
-    """Return (warehouse_id, sku, qty, surplus) with qty > max_level, sorted.
+    """Return (warehouse_id, sku, qty, surplus) with qty > max level, sorted.
 
-    surplus = qty - max_level.
+    The max level is the item's own ``policies[(wh, sku)].max_level`` when
+    given, otherwise the global ``max_level``. surplus = qty - that max level.
     """
-    return sorted(
-        (wh, sku, qty, qty - max_level)
-        for (wh, sku), qty in stock.items()
-        if qty > max_level
-    )
+    result = []
+    for (wh, sku), qty in stock.items():
+        limit = _threshold(policies, (wh, sku), "max_level", max_level)
+        if qty > limit:
+            result.append((wh, sku, qty, qty - limit))
+    return sorted(result)
 
 
 def order_metrics(orders: list[Any]) -> dict[str, Any]:
@@ -87,14 +104,19 @@ def build_report(
     current_day: int,
     reorder_point: int = 20,
     max_level: int = 500,
+    policies: Policies = None,
 ) -> dict[str, Any]:
-    """Combine all analytics into a single report dict."""
+    """Combine all analytics into a single report dict.
+
+    ``policies`` optionally maps (warehouse_id, sku) to that item's thresholds;
+    items not in it use the global ``reorder_point`` and ``max_level``.
+    """
     return {
         "day": current_day,
         "delayed_shipments": find_delayed_shipments(shipments, current_day),
         "stockouts": find_stockouts(stock),
-        "low_stock": find_low_stock(stock, reorder_point),
-        "excess": find_excess(stock, max_level),
+        "low_stock": find_low_stock(stock, reorder_point, policies),
+        "excess": find_excess(stock, max_level, policies),
         "orders": order_metrics(orders),
     }
 
