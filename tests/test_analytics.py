@@ -196,3 +196,35 @@ def test_format_report_prints_no_issues_for_empty_sections():
     assert text.count("No issues") == 4
     assert "Delayed shipments (0)" in text
 
+
+
+# ---- per-item thresholds (SAD 4.6 L1) ----
+
+def test_low_stock_and_excess_use_each_items_own_policy():
+    stock = {("W1", "FAST"): 40, ("W1", "BULK"): 40, ("W1", "OTHER"): 40}
+    policies = {
+        ("W1", "FAST"): SimpleNamespace(reorder_point=50, max_level=200),
+        ("W1", "BULK"): SimpleNamespace(reorder_point=10, max_level=30),
+    }
+    # FAST: 40 <= 50 -> low. BULK: 40 > 30 -> excess with surplus 10.
+    # OTHER has no policy -> global defaults (20 / 500) -> neither.
+    assert find_low_stock(stock, policies=policies) == [("W1", "FAST", 40)]
+    assert find_excess(stock, policies=policies) == [("W1", "BULK", 40, 10)]
+
+
+def test_items_without_policy_fall_back_to_global_thresholds():
+    stock = {("W1", "A"): 15, ("W1", "B"): 600}
+    policies = {("W2", "UNRELATED"): SimpleNamespace(reorder_point=0, max_level=0)}
+    assert find_low_stock(stock, reorder_point=20, policies=policies) == [("W1", "A", 15)]
+    assert find_excess(stock, max_level=500, policies=policies) == [("W1", "B", 600, 100)]
+    # no policies at all behaves exactly as before
+    assert find_low_stock(stock) == [("W1", "A", 15)]
+    assert find_excess(stock) == [("W1", "B", 600, 100)]
+
+
+def test_build_report_passes_policies_through():
+    stock = {("W1", "A"): 40}
+    policies = {("W1", "A"): SimpleNamespace(reorder_point=50, max_level=35)}
+    report = build_report(stock, [], [], current_day=1, policies=policies)
+    assert report["low_stock"] == [("W1", "A", 40)]
+    assert report["excess"] == [("W1", "A", 40, 5)]

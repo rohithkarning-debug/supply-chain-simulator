@@ -184,3 +184,17 @@ def test_blocked_arrival_is_logged_and_delivered_once_space_frees():
     sim.step()  # day 3: stock 50 after C2's order, so the 30 units now fit
     assert sim.logs[2].delivered == [shipment] and sim.logs[2].blocked == []
     assert sim.inventory.level("WH", "SKU") == 80
+
+
+def test_report_uses_per_item_policy_thresholds():
+    """SAD 4.6 L1: the daily report judges each item against its own StockPolicy."""
+    sim = Simulation(seed=1)
+    sim.add_supplier("SUP", "Reliable", lead_time_days=1, reliability=1.0)
+    sim.add_warehouse("WH", capacity=1000)
+    sim.set_policy("WH", "FAST", "SUP", StockPolicy(50, 100, 300))
+    sim.set_policy("WH", "BULK", "SUP", StockPolicy(5, 10, 30))
+    sim.add_stock("WH", "FAST", 40)  # global 20 would miss this; its own 50 flags it
+    sim.add_stock("WH", "BULK", 40)  # global 500 would miss this; its own 30 flags it
+    report = sim.step()
+    assert ("WH", "FAST", 40) in report["low_stock"]
+    assert ("WH", "BULK", 40, 10) in report["excess"]
