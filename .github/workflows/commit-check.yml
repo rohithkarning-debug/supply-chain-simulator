@@ -1,0 +1,29 @@
+name: Commit check
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+jobs:
+  commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check commit messages and PR description
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Patterns are split so this file does not contain the phrases it blocks.
+          TRAILER='co-''authored-by:'
+          GEN='gene''rated with'
+          if git log --format=%B "$BASE..$HEAD" | grep -qiE "^${TRAILER}|-session:"; then
+            echo "::error::A commit message has a co-author or session trailer. Amend the commit and push again."
+            exit 1
+          fi
+          if printf '%s' "$BODY" | grep -qiE "${GEN}|/code/session_"; then
+            echo "::error::The PR description has a tool footer or session link. Edit the description."
+            exit 1
+          fi
+          echo "Commit messages and PR description OK"

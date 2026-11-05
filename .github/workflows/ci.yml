@@ -14,4 +14,10 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements.txt
       - run: pip install -e .
-      - run: pytest -v --cov=scm_sim
+      - run: pytest -v --cov=scm_sim --cov-branch --cov-report=term-missing --cov-report=html --cov-fail-under=90
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov/
