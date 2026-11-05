@@ -1,0 +1,31 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.9, pytest-9.2.0, pluggy-1.7.0
+rootdir: /home/pranav/code/supply-chain-simulator
+configfile: pytest.ini
+testpaths: tests
+plugins: cov-7.1.0
+collected 84 items
+
+tests/test_analytics.py ..........................                       [ 30%]
+tests/test_inventory.py .......................                          [ 58%]
+tests/test_orders.py ........                                            [ 67%]
+tests/test_packaging.py ...                                              [ 71%]
+tests/test_shipments.py ...........                                      [ 84%]
+tests/test_simulator.py .............                                    [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.9-final-0 ________________
+
+Name                       Stmts   Miss  Cover   Missing
+--------------------------------------------------------
+src/scm_sim/__init__.py        1      0   100%
+src/scm_sim/__main__.py       20      2    90%   19, 31
+src/scm_sim/analytics.py      58      0   100%
+src/scm_sim/inventory.py      59      1    98%   58
+src/scm_sim/orders.py         60      3    95%   25, 62, 73
+src/scm_sim/shipments.py      78      0   100%
+src/scm_sim/simulator.py     149      6    96%   104, 173, 228, 244-245, 252
+--------------------------------------------------------
+TOTAL                        425     12    97%
+Coverage HTML written to dir docs/test-reports/coverage/html
+============================== 84 passed in 1.53s ==============================
