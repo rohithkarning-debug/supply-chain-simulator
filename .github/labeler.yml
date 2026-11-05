@@ -1,0 +1,10 @@
+fix:
+  - head-branch: ['^fix/']
+feature:
+  - head-branch: ['^feat/', '^feature/', '^ci/']
+test:
+  - head-branch: ['^test/']
+docs:
+  - head-branch: ['^docs/']
+  - changed-files:
+      - any-glob-to-any-file: ['docs/**', 'README.md']
