@@ -46,4 +46,3 @@ Combined line + branch coverage: 96% — 112 total branches, 12 partially covere
 | src/scm_sim/simulator.py | 251->252 | input-validation raise path | No test triggers the raise on line 252. |
 
 Exact arcs are also visible in the HTML report: docs/test-reports/branch-coverage/html/index.html.
-MDEOF
