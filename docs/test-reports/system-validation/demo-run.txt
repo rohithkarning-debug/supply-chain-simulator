@@ -1,0 +1,62 @@
+﻿Supply Chain Simulator demo: 10 day(s), seed 42
+
+Day 1:
+  fulfilled ORD-0001: 30 WIDGET from WH-NORTH
+  fulfilled ORD-0002: 25 WIDGET from WH-SOUTH
+  flags: 0 delayed, 0 stockout, 0 low, 1 excess | fill rate 1.0
+Day 2:
+  fulfilled ORD-0003: 40 GADGET from WH-SOUTH
+  fulfilled ORD-0004: 20 GIZMO from WH-NORTH
+  reorder   SHP-0001: 120 GADGET from SUP-FLAKY -> WH-SOUTH, due day 4
+  flags: 0 delayed, 1 stockout, 0 low, 1 excess | fill rate 1.0
+Day 3:
+  fulfilled ORD-0006: 45 WIDGET from WH-NORTH
+  BACKORDER ORD-0005: 30 GADGET from WH-SOUTH
+  flags: 0 delayed, 1 stockout, 0 low, 1 excess | fill rate 0.83
+Day 4:
+  fulfilled ORD-0007: 20 WIDGET from WH-SOUTH
+  reorder   SHP-0002: 100 WIDGET from SUP-FLAKY -> WH-SOUTH, due day 6
+  flags: 0 delayed, 1 stockout, 1 low, 1 excess | fill rate 0.86
+Day 5:
+  arrived   SHP-0001: 120 GADGET -> WH-SOUTH, 1 day(s) late
+  filled    ORD-0005: back-order from day 3 now shipped
+  fulfilled ORD-0008: 20 WIDGET from WH-NORTH
+  fulfilled ORD-0009: 25 GADGET from WH-SOUTH
+  reorder   SHP-0003: 150 WIDGET from SUP-RELIABLE -> WH-NORTH, due day 7
+  flags: 1 delayed, 0 stockout, 2 low, 1 excess | fill rate 1.0
+Day 6:
+  fulfilled ORD-0010: 30 GIZMO from WH-NORTH
+  flags: 1 delayed, 0 stockout, 2 low, 1 excess | fill rate 1.0
+Day 7:
+  arrived   SHP-0002: 100 WIDGET -> WH-SOUTH, 1 day(s) late
+  arrived   SHP-0003: 150 WIDGET -> WH-NORTH
+  fulfilled ORD-0011: 30 WIDGET from WH-SOUTH
+  flags: 2 delayed, 0 stockout, 0 low, 1 excess | fill rate 1.0
+Day 8:
+  fulfilled ORD-0012: 35 GADGET from WH-SOUTH
+  flags: 2 delayed, 0 stockout, 0 low, 1 excess | fill rate 1.0
+Day 9:
+  fulfilled ORD-0013: 40 WIDGET from WH-NORTH
+  flags: 2 delayed, 0 stockout, 0 low, 1 excess | fill rate 1.0
+Day 10:
+  fulfilled ORD-0014: 15 WIDGET from WH-SOUTH
+  flags: 2 delayed, 0 stockout, 0 low, 1 excess | fill rate 1.0
+
+=== Supply Chain Report: Day 10 ===
+
+Delayed shipments (2)
+  - SHP-0001: GADGET to WH-SOUTH, 1 day(s) late
+  - SHP-0002: WIDGET to WH-SOUTH, 1 day(s) late
+
+Stockouts (0)
+  No issues
+
+Low stock (0)
+  No issues
+
+Excess (1)
+  - WH-NORTH / GIZMO: 600 (surplus 100)
+
+Orders (14)
+  pending 0, fulfilled 14, backordered 0, cancelled 0
+  fill rate: 1.0
