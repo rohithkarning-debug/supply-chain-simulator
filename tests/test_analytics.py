@@ -8,7 +8,9 @@ from scm_sim.analytics import (
     find_low_stock,
     find_stockouts,
     format_report,
+    format_run_summary,
     order_metrics,
+    summarize_run,
 )
 def ship(shipment_id, expected_day, actual_day=None, sku="A", warehouse_id="W1"):
     return SimpleNamespace(
@@ -228,3 +230,88 @@ def test_build_report_passes_policies_through():
     report = build_report(stock, [], [], current_day=1, policies=policies)
     assert report["low_stock"] == [("W1", "A", 40)]
     assert report["excess"] == [("W1", "A", 40, 5)]
+
+
+def test_summarize_run_and_format():
+    history = [
+        {
+            "day": 1,
+            "delayed_shipments": [{"shipment_id": "S1"}],
+            "stockouts": [("W1", "SKU1")],
+            "low_stock": [],
+            "excess": [],
+            "orders": {"fill_rate": 0.5},
+        },
+        {
+            "day": 2,
+            "delayed_shipments": [{"shipment_id": "S1"}, {"shipment_id": "S2"}],
+            "stockouts": [],
+            "low_stock": [("W1", "SKU2", 5)],
+            "excess": [("W1", "SKU3", 600, 100)],
+            "orders": {"fill_rate": 0.8},
+        },
+        {
+            "day": 3,
+            "delayed_shipments": [],
+            "stockouts": [("W1", "SKU1")],
+            "low_stock": [],
+            "excess": [("W1", "SKU3", 700, 200)],
+            "orders": {"fill_rate": 1.0},
+        },
+    ]
+    summary = summarize_run(history)
+    assert summary["days"] == 3
+    assert summary["days_with_delays"] == 2
+    assert summary["days_with_stockouts"] == 2
+    assert summary["days_with_low_stock"] == 1
+    assert summary["days_with_excess"] == 2
+    assert summary["peak_delayed"] == 2
+    assert summary["final_fill_rate"] == 1.0
+
+    text = format_run_summary(summary)
+    assert "=== Run Summary ===" in text
+    for field in [
+        "days",
+        "days_with_delays",
+        "days_with_stockouts",
+        "days_with_low_stock",
+        "days_with_excess",
+        "peak_delayed",
+        "final_fill_rate",
+    ]:
+        assert field in text
+
+
+def test_summarize_run_empty_history():
+    summary = summarize_run([])
+    assert summary["days"] == 0
+    assert summary["days_with_delays"] == 0
+    assert summary["days_with_stockouts"] == 0
+    assert summary["days_with_low_stock"] == 0
+    assert summary["days_with_excess"] == 0
+    assert summary["peak_delayed"] == 0
+    assert summary["final_fill_rate"] == 0.0
+
+    text = format_run_summary(summary)
+    assert "=== Run Summary ===" in text
+    for field in [
+        "days",
+        "days_with_delays",
+        "days_with_stockouts",
+        "days_with_low_stock",
+        "days_with_excess",
+        "peak_delayed",
+        "final_fill_rate",
+    ]:
+        assert field in text
+
+
+def test_order_metrics_unknown_status():
+    orders = [order(1, "lost"), order(2, "FULFILLED")]
+    m = order_metrics(orders)
+    assert m["total"] == 2
+    assert m["pending"] == 0
+    assert m["fulfilled"] == 1
+    assert m["backordered"] == 0
+    assert m["cancelled"] == 0
+    assert m["fill_rate"] == 0.5
