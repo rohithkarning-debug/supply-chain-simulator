@@ -1,3 +1,4 @@
+import csv
 import os
 import subprocess
 import sys
@@ -9,7 +10,7 @@ from scm_sim.__main__ import main
 from scm_sim.inventory import StockPolicy
 from scm_sim.orders import OrderStatus
 from scm_sim.shipments import ShipmentStatus
-from scm_sim.simulator import Simulation, build_demo, describe_day
+from scm_sim.simulator import Simulation, build_demo, describe_day, metrics_rows
 
 SRC = Path(__file__).resolve().parents[1] / "src"
 
@@ -131,6 +132,51 @@ def test_cli_main_summary_flag(capsys):
     out_no_summary = capsys.readouterr().out
     assert "Run Summary" not in out_no_summary
 
+def test_metrics_rows_has_one_flat_row_per_day():
+    rows = metrics_rows(build_demo(seed=42).run(3))
+    assert len(rows) == 3
+    assert list(rows[0]) == [
+        "day",
+        "delayed",
+        "stockouts",
+        "low_stock",
+        "excess",
+        "pending",
+        "fulfilled",
+        "backordered",
+        "cancelled",
+        "fill_rate",
+    ]
+    assert rows[0]["day"] == 1
+    assert rows[2]["day"] == 3
+
+
+def test_cli_csv_export(tmp_path, capsys):
+    csv_path = tmp_path / "metrics.csv"
+    assert main(["--days", "3", "--csv", str(csv_path)]) == 0
+    with csv_path.open(newline="", encoding="utf-8") as csv_file:
+        rows = list(csv.DictReader(csv_file))
+    assert len(rows) == 3
+    assert list(rows[0]) == [
+        "day",
+        "delayed",
+        "stockouts",
+        "low_stock",
+        "excess",
+        "pending",
+        "fulfilled",
+        "backordered",
+        "cancelled",
+        "fill_rate",
+    ]
+    assert rows[0]["day"] == "1"
+    assert "Supply Chain Simulator demo" in capsys.readouterr().out
+
+
+def test_cli_csv_and_summary_flags(tmp_path):
+    csv_path = tmp_path / "metrics.csv"
+    assert main(["--days", "3", "--csv", str(csv_path), "--summary"]) == 0
+    assert len(list(csv.DictReader(csv_path.open(newline="", encoding="utf-8")))) == 3
 
 def test_cli_rejects_zero_days():
     with pytest.raises(SystemExit) as exc_info:

@@ -270,6 +270,26 @@ def describe_day(log: DayLog, report: Report) -> str:
     return "\n".join(lines)
 
 
+def metrics_rows(history: List[Report]) -> List[Dict[str, Any]]:
+    """Return one flat metrics dictionary for each daily report."""
+    rows = []
+    for report in history:
+        orders = report["orders"]
+        rows.append({
+            "day": report["day"],
+            "delayed": len(report["delayed_shipments"]),
+            "stockouts": len(report["stockouts"]),
+            "low_stock": len(report["low_stock"]),
+            "excess": len(report["excess"]),
+            "pending": orders["pending"],
+            "fulfilled": orders["fulfilled"],
+            "backordered": orders["backordered"],
+            "cancelled": orders["cancelled"],
+            "fill_rate": orders["fill_rate"],
+        })
+    return rows
+
+
 def build_demo(seed: int = 42) -> Simulation:
     """Return a ready-to-run 10-day scenario.
 
