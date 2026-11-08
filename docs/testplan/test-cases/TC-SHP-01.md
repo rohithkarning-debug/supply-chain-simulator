@@ -11,5 +11,8 @@
 | **Expected result** | Invalid parameters and duplicate supplier registrations raise `ValueError`; unknown supplier dispatches raise `KeyError`; non-positive quantities raise `ValueError`; generated shipment IDs follow `SHP-0001`, `SHP-0002`; `expected_day` strictly equals `2 + 3 = 5`. |
 | **Pass/fail criteria** | **Pass** if all assertions hold and exceptions are raised without state mutation; **Fail** if invalid parameters are accepted, IDs collide, or `expected_day` is miscalculated. |
 | **Automated by** | `tests/test_shipments.py::test_supplier_validation`<br>`tests/test_shipments.py::test_add_supplier_and_reject_duplicate_and_unknown`<br>`tests/test_shipments.py::test_expected_day_calculated_from_lead_time`<br>`tests/test_shipments.py::test_shipment_id_sequence_and_in_transit_filtering`<br>`tests/test_shipments.py::test_reject_non_positive_quantity` |
-| **Actual result** | Pass (CI run #20, commit `b3702ef`) |
+| **Actual result** | Pass (97 tests; commit f91dd71) |
 | **Status** | Passed |
+
+Reviewed 08-11-2026: no change needed after Sprint 2.
+Updated 08-11-2026: verified baseline tests pass on current main (#62)
