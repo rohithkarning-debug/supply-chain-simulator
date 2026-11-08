@@ -122,6 +122,16 @@ def test_cli_main_runs(capsys):
     assert "=== Supply Chain Report: Day 3 ===" in out
 
 
+def test_cli_main_summary_flag(capsys):
+    assert main(["--days", "3", "--summary"]) == 0
+    out = capsys.readouterr().out
+    assert "Run Summary" in out
+
+    assert main(["--days", "3"]) == 0
+    out_no_summary = capsys.readouterr().out
+    assert "Run Summary" not in out_no_summary
+
+
 def test_cli_runs_as_module():
     env = {**os.environ, "PYTHONPATH": str(SRC)}
     result = subprocess.run(

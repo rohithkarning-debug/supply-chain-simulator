@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from typing import List, Optional
 
+from scm_sim.analytics import format_run_summary, summarize_run
 from scm_sim.simulator import build_demo, describe_day
 
 
@@ -14,6 +15,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     parser.add_argument("--days", type=int, default=10, help="days to simulate (default 10)")
     parser.add_argument("--seed", type=int, default=42, help="random seed (default 42)")
+    parser.add_argument(
+        "--summary", action="store_true", help="print a summary over all days"
+    )
     args = parser.parse_args(argv)
     if args.days < 1:
         parser.error("--days must be at least 1")
@@ -24,6 +28,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(describe_day(sim.logs[report["day"] - 1], report))
     print()
     print(sim.final_summary())
+    if args.summary:
+        print()
+        print(format_run_summary(summarize_run(sim.history)))
     return 0
 
 

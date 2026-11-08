@@ -163,4 +163,62 @@ def format_report(report: dict[str, Any]) -> str:
     )
     lines.append(f"  fill rate: {o['fill_rate']}")
 
-    return "\n".join(lines)	
+    return "\n".join(lines)
+
+
+def summarize_run(history: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarise a simulation run over all daily reports.
+
+    Args:
+        history: List of daily report dicts (from Simulation.history).
+
+    Returns:
+        Dict containing summary metrics across the entire run:
+            days: Total number of daily reports.
+            days_with_delays: Number of days with at least one delayed shipment.
+            days_with_stockouts: Number of days with at least one stockout.
+            days_with_low_stock: Number of days with at least one low-stock SKU.
+            days_with_excess: Number of days with at least one excess SKU.
+            peak_delayed: Highest number of delayed shipments on any single day.
+            final_fill_rate: Order fill rate from the final day's report (0.0 if empty).
+    """
+    if not history:
+        return {
+            "days": 0,
+            "days_with_delays": 0,
+            "days_with_stockouts": 0,
+            "days_with_low_stock": 0,
+            "days_with_excess": 0,
+            "peak_delayed": 0,
+            "final_fill_rate": 0.0,
+        }
+
+    return {
+        "days": len(history),
+        "days_with_delays": sum(1 for r in history if r["delayed_shipments"]),
+        "days_with_stockouts": sum(1 for r in history if r["stockouts"]),
+        "days_with_low_stock": sum(1 for r in history if r["low_stock"]),
+        "days_with_excess": sum(1 for r in history if r["excess"]),
+        "peak_delayed": max(len(r["delayed_shipments"]) for r in history),
+        "final_fill_rate": history[-1]["orders"]["fill_rate"],
+    }
+
+
+def format_run_summary(summary: dict[str, Any]) -> str:
+    """Render a run summary dict as readable multi-line text."""
+    lines = [
+        "=== Run Summary ===",
+        f"  days: {summary['days']}",
+        f"  days_with_delays: {summary['days_with_delays']}",
+        f"  days_with_stockouts: {summary['days_with_stockouts']}",
+        f"  days_with_low_stock: {summary['days_with_low_stock']}",
+        f"  days_with_excess: {summary['days_with_excess']}",
+        f"  peak_delayed: {summary['peak_delayed']}",
+        f"  final_fill_rate: {summary['final_fill_rate']}",
+    ]
+    return "\n".join(lines)
+
+
+# Aliases for backward compatibility
+summarize_history = summarize_run
+format_summary = format_run_summary	
