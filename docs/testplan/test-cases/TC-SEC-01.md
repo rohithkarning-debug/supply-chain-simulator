@@ -11,5 +11,8 @@
 | **Expected result** | `ValueError` raised for invalid parameters with state left unchanged; `InsufficientStockError` and `CapacityExceededError` raised with inventory intact; `cancel()` on FULFILLED raises `ValueError`; unknown entity references raise `KeyError`; mutating returned snapshot has zero effect on internal inventory. |
 | **Pass/fail criteria** | **Pass** if all invalid input vectors are rejected, state invariants remain uncompromised, and snapshots are independent; **Fail** if state corruption, silent mutation, or unhandled crashes occur. |
 | **Automated by** | `tests/test_inventory.py::test_remove_too_much_raises`<br>`tests/test_inventory.py::test_add_beyond_capacity_raises_and_leaves_stock_unchanged`<br>`tests/test_inventory.py::test_stock_policy_rejects_invalid_values`<br>`tests/test_inventory.py::test_snapshot_returns_independent_copy`<br>`tests/test_orders.py::test_invalid_quantity`<br>`tests/test_orders.py::test_cancel_rules`<br>`tests/test_shipments.py::test_supplier_validation`<br>`tests/test_shipments.py::test_add_supplier_and_reject_duplicate_and_unknown`<br>`tests/test_simulator.py::test_schedule_order_validates_input` |
-| **Actual result** | Pass (CI run #20, commit `b3702ef`) |
+| **Actual result** | Pass (97 tests; commit f91dd71) |
 | **Status** | Passed |
+
+Reviewed 08-11-2026: no change needed after Sprint 2.
+Updated 08-11-2026: verified all security and input validation tests pass on current main (#62)
