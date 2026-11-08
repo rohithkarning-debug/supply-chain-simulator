@@ -122,3 +122,33 @@ def test_rejected_order_does_not_consume_an_id():
     assert first.order_id == "ORD-0001"
     assert second.order_id == "ORD-0002"
     assert [o.order_id for o in om.by_status(OrderStatus.PENDING)] == ["ORD-0001", "ORD-0002"]
+
+
+def test_order_dataclass_rejects_non_positive_quantity_directly():
+    """Order validates itself even when built without OrderManager.create."""
+    with pytest.raises(ValueError, match="quantity must be greater than 0"):
+        Order("ORD-9999", "C1", "WH1", "SKU1", 0, created_day=1)
+
+
+def test_get_unknown_order_raises_key_error():
+    om = OrderManager(Inventory())
+    with pytest.raises(KeyError, match="ORD-0042"):
+        om.get("ORD-0042")
+
+
+def test_fulfilled_or_cancelled_orders_are_never_reprocessed():
+    """SCM-SR-003: try_fulfil leaves FULFILLED and CANCELLED orders and the stock untouched."""
+    inv = Inventory()
+    inv.add("WH1", "SKU1", 100)
+    om = OrderManager(inv)
+    done = om.create("C1", "WH1", "SKU1", 10, day=1)
+    assert om.try_fulfil(done, day=1) is True
+    cancelled = om.create("C2", "WH1", "SKU1", 10, day=1)
+    om.cancel(cancelled.order_id)
+
+    assert om.try_fulfil(done, day=2) is False
+    assert om.try_fulfil(cancelled, day=2) is False
+    assert done.status == OrderStatus.FULFILLED
+    assert cancelled.status == OrderStatus.CANCELLED
+    assert inv.level("WH1", "SKU1") == 90
+
