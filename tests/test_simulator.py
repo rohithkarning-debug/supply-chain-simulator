@@ -132,6 +132,36 @@ def test_cli_main_summary_flag(capsys):
     assert "Run Summary" not in out_no_summary
 
 
+def test_cli_rejects_zero_days():
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--days", "0"])
+    assert exc_info.value.code == 2
+
+
+def test_set_policy_rejects_unknown_supplier():
+    sim = Simulation()
+    sim.add_warehouse("WH", capacity=1000)
+    with pytest.raises(KeyError, match="Unknown supplier"):
+        sim.set_policy("WH", "SKU", "UNKNOWN", StockPolicy())
+
+
+def test_run_rejects_negative_days():
+    sim = make_sim()
+    with pytest.raises(ValueError, match="days must not be negative"):
+        sim.run(-1)
+
+
+def test_replenishment_skips_full_warehouse():
+    sim = Simulation(seed=1)
+    sim.add_supplier("SUP", "Reliable", lead_time_days=1, reliability=1.0)
+    sim.add_warehouse("WH", capacity=10)
+    sim.set_policy("WH", "SKU", "SUP", StockPolicy(reorder_point=20, reorder_quantity=100, max_level=500))
+    sim.add_stock("WH", "SKU", 10)
+    sim.step()
+    assert sim.logs[0].reorders == []
+    assert sim.shipments.in_transit() == []
+
+
 def test_cli_runs_as_module():
     env = {**os.environ, "PYTHONPATH": str(SRC)}
     result = subprocess.run(
@@ -171,6 +201,9 @@ def test_older_backorder_is_served_before_new_order_on_same_day():
     assert sim.inventory.level("WH", "SKU") == 20
     assert [o.order_id for o in sim.logs[1].backorders_filled] == ["ORD-0001"]
     assert [o.order_id for o in sim.logs[1].backordered] == ["ORD-0002"]
+    text = describe_day(sim.logs[1], sim.history[1])
+    assert "arrived   SHP-0001" in text
+    assert "filled    ORD-0001" in text
 
 
 def test_blocked_arrival_is_logged_and_delivered_once_space_frees():

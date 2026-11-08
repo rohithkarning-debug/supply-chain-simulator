@@ -15,6 +15,15 @@ def test_remove_reduces_stock():
     inv.add("WH1", "SKU1", 50)
     assert inv.remove("WH1", "SKU1", 20) == 30
 
+
+@pytest.mark.parametrize("quantity", [0, -1])
+def test_remove_rejects_non_positive_quantity(quantity):
+    inv = Inventory()
+    inv.add("WH1", "SKU1", 50)
+    with pytest.raises(ValueError, match="qty must be positive"):
+        inv.remove("WH1", "SKU1", quantity)
+
+
 def test_remove_too_much_raises():
     inv = Inventory()
     inv.add("WH1", "SKU1", 5)
