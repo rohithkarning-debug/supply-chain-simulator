@@ -8,16 +8,40 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - run: pip install -r requirements.txt
       - run: pip install -e .
-      - run: pytest -v --cov=scm_sim --cov-branch --cov-report=term-missing --cov-report=html --cov-fail-under=90
+      - run: pytest -v --cov=scm_sim --cov-branch --cov-fail-under=90 --cov-report=term-missing --cov-report=html --cov-report=xml:coverage.xml --junitxml=junit.xml
+      - name: Add coverage summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          coverage = Path("coverage.xml")
+          if not coverage.exists():
+              print("## Coverage Summary\nCoverage report not generated.")
+          else:
+              root = ET.parse(coverage).getroot()
+              line_rate = float(root.attrib["line-rate"]) * 100
+              branch_rate = float(root.attrib["branch-rate"]) * 100
+              print("## Coverage Summary")
+              print("| Metric | Coverage |")
+              print("|---|---:|")
+              print(f"| Lines | {line_rate:.1f}% |")
+              print(f"| Branches | {branch_rate:.1f}% |")
+          PY
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-html
-          path: htmlcov/
+          name: test-reports
+          path: |
+            htmlcov/
+            junit.xml
+            coverage.xml

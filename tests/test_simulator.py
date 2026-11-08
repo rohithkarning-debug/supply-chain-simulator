@@ -132,8 +132,6 @@ def test_cli_main_summary_flag(capsys):
     out_no_summary = capsys.readouterr().out
     assert "Run Summary" not in out_no_summary
 
-
- feature/54-csv-export
 def test_metrics_rows_has_one_flat_row_per_day():
     rows = metrics_rows(build_demo(seed=42).run(3))
     assert len(rows) == 3
@@ -208,7 +206,6 @@ def test_replenishment_skips_full_warehouse():
     sim.step()
     assert sim.logs[0].reorders == []
     assert sim.shipments.in_transit() == []
- main
 
 
 def test_cli_runs_as_module():
