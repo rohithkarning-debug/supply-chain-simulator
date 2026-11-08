@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from typing import List, Optional
 
 from scm_sim.analytics import format_run_summary, summarize_run
-from scm_sim.simulator import build_demo, describe_day
+from scm_sim.simulator import build_demo, describe_day, metrics_rows
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -18,6 +19,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--summary", action="store_true", help="print a summary over all days"
     )
+    parser.add_argument("--csv", metavar="PATH", help="write daily metrics to a CSV file")
     args = parser.parse_args(argv)
     if args.days < 1:
         parser.error("--days must be at least 1")
@@ -31,6 +33,23 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.summary:
         print()
         print(format_run_summary(summarize_run(sim.history)))
+    if args.csv:
+        fieldnames = [
+            "day",
+            "delayed",
+            "stockouts",
+            "low_stock",
+            "excess",
+            "pending",
+            "fulfilled",
+            "backordered",
+            "cancelled",
+            "fill_rate",
+        ]
+        with open(args.csv, "w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(metrics_rows(sim.history))
     return 0
 
 
