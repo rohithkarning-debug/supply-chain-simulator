@@ -15,3 +15,5 @@
 | Automated by | `tests/test_inventory.py::test_stock_policy_rejects_invalid_values` (4 parametrised cases), `tests/test_inventory.py::test_needs_reorder_at_boundary`, `tests/test_inventory.py::test_is_excess_only_above_max_level`, `tests/test_inventory.py::test_reorder_suggestions_sorted_and_only_tracked_items`, `tests/test_inventory.py::test_snapshot_returns_independent_copy`. Supporting: `test_stock_policy_defaults` (20 / 100 / 500), `test_stock_policy_allows_max_level_equal_to_reorder_point`, `test_get_policy_returns_default_when_unset`, `test_set_policy_is_per_warehouse_and_sku`, `test_reorder_suggestions_empty_for_new_inventory` |
 | Actual result | Pass (CI run #20, commit b3702ef) |
 | Status | Passed |
+
+**Revision 08-11-2026:** Confirmed the documented stock-policy boundaries and reorder suggestion order against the current implementation and automated tests.
