@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/scm_sim/inventory.py: 98%</title>
+    <title>Coverage for src\scm_sim\inventory.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
-    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
-    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+    <link rel="stylesheet" href="style_cb_0853b3de.css" type="text/css">
+    <script src="coverage_html_cb_c6c441fc.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>src<span class="sep">/</span>scm_sim<span class="sep">/</span>inventory.py</b>:
-            <span class="pc_cov">98%</span>
+            <span class="text">Coverage for </span><b>src<span class="sep">\</span>scm_sim<span class="sep">\</span>inventory.py</b>:
+            <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,17 +55,17 @@
         </aside>
         <h2>
             <span class="text">59 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">58<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">59<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_79f2474c62f9b43e_analytics_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_ec0d06e9b7a040dc_analytics_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a id="nextFileLink" class="nav" href="z_79f2474c62f9b43e_orders_py.html">&#xbb; next</a>
+            <a id="nextFileLink" class="nav" href="z_ec0d06e9b7a040dc_orders_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-05 17:12 +0530
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
+            created at 2026-11-09 18:19 +0530
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -110,7 +110,7 @@
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">        <span class="str">&quot;&quot;&quot;Validate that the thresholds are non-negative and consistent.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">        <span class="key">for</span> <span class="nam">name</span> <span class="key">in</span> <span class="op">(</span><span class="str">&quot;reorder_point&quot;</span><span class="op">,</span> <span class="str">&quot;reorder_quantity&quot;</span><span class="op">,</span> <span class="str">&quot;max_level&quot;</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">            <span class="key">if</span> <span class="nam">getattr</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">name</span><span class="op">)</span> <span class="op">&lt;</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f&quot;</span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst"> must not be negative</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f&quot;{name} must not be negative&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">max_level</span> <span class="op">&lt;</span> <span class="nam">self</span><span class="op">.</span><span class="nam">reorder_point</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">&quot;max_level must be &gt;= reorder_point&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -130,16 +130,16 @@
     <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">        <span class="nam">capacity</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_capacity</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">        <span class="key">if</span> <span class="nam">capacity</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">total_in_warehouse</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">)</span> <span class="op">+</span> <span class="nam">qty</span> <span class="op">&gt;</span> <span class="nam">capacity</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">            <span class="key">raise</span> <span class="nam">CapacityExceededError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">                <span class="fst">f&quot;</span><span class="fst">adding </span><span class="op">{</span><span class="nam">qty</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">sku</span><span class="op">}</span><span class="fst"> would exceed capacity </span><span class="op">{</span><span class="nam">capacity</span><span class="op">}</span><span class="fst"> at </span><span class="op">{</span><span class="nam">warehouse</span><span class="op">}</span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">                <span class="str">f&quot;adding {qty} {sku} would exceed capacity {capacity} at {warehouse}&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_stock</span><span class="op">[</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">level</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">)</span> <span class="op">+</span> <span class="nam">qty</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">level</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">    <span class="key">def</span> <span class="nam">remove</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">,</span> <span class="nam">qty</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">        <span class="key">if</span> <span class="nam">qty</span> <span class="op">&lt;=</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">&quot;qty must be positive&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">&quot;qty must be positive&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">        <span class="key">if</span> <span class="nam">qty</span> <span class="op">&gt;</span> <span class="nam">self</span><span class="op">.</span><span class="nam">level</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">            <span class="key">raise</span> <span class="nam">InsufficientStockError</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">not enough </span><span class="op">{</span><span class="nam">sku</span><span class="op">}</span><span class="fst"> at </span><span class="op">{</span><span class="nam">warehouse</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">            <span class="key">raise</span> <span class="nam">InsufficientStockError</span><span class="op">(</span><span class="str">f&quot;not enough {sku} at {warehouse}&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_stock</span><span class="op">[</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">)</span><span class="op">]</span> <span class="op">-=</span> <span class="nam">qty</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">level</span><span class="op">(</span><span class="nam">warehouse</span><span class="op">,</span> <span class="nam">sku</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -201,12 +201,12 @@
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_79f2474c62f9b43e_analytics_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_ec0d06e9b7a040dc_analytics_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a class="nav" href="z_79f2474c62f9b43e_orders_py.html">&#xbb; next</a>
+            <a class="nav" href="z_ec0d06e9b7a040dc_orders_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-05 17:12 +0530
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
+            created at 2026-11-09 18:19 +0530
         </p>
     </div>
 </footer>
