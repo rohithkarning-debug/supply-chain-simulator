@@ -49,7 +49,7 @@ orders = OrderManager(inv)
 ---
 
 #### 4. `create(customer_id, warehouse_id, sku, quantity, day)`
-Creates, assigns a sequential identifier to, and records a new customer order.
+Creates, assigns a sequential identifier to, and records a new customer order. Validates that quantity $> 0$ prior to allocating the sequential identifier; if quantity $\le 0$, raises `ValueError` immediately without incrementing the order counter, leaving the sequence contiguous without gaps (#68).
 - **Signature:** `create(customer_id: str, warehouse_id: str, sku: str, quantity: int, day: int) -> Order`
 - **Parameters:**
   - `customer_id` (`str`): Unique customer identifier.
@@ -59,7 +59,7 @@ Creates, assigns a sequential identifier to, and records a new customer order.
   - `day` (`int`): Current simulation day.
 - **Returns:** The newly instantiated `Order` object with status `OrderStatus.PENDING`.
 - **Raises:**
-  - `ValueError`: If `quantity <= 0`.
+  - `ValueError`: If `quantity <= 0` (validation occurs prior to identifier allocation, preserving sequence integrity).
 - **Example:**
 ```python
 order = orders.create("C-ACME", "WH-NORTH", "WIDGET", 50, day=1)
@@ -105,7 +105,7 @@ if not success:
 ---
 
 #### 7. `process_open(day)`
-Retries fulfillment for all `PENDING` and `BACKORDERED` orders using strict oldest-first FIFO priority.
+Retries fulfillment for all `PENDING` and `BACKORDERED` orders using strict oldest-first FIFO priority. Within the daily simulation cycle (`Simulation.step()`), `process_open()` is invoked prior to admitting new same-day customer demand, ensuring that existing open back-orders are served before new orders (#69).
 - **Signature:** `process_open(day: int) -> list[Order]`
 - **Parameters:**
   - `day` (`int`): Current simulation day.
