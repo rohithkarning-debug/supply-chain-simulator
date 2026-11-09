@@ -32,3 +32,13 @@ Testing runs alongside development. Automated tests were written together with e
 - Activity 6 depends on M2 (manual tests run against commit `b3702ef` or a later green `main`).
 - Activity 9 depends on M4 and on all defects from activity 7 being closed or accepted.
 - If testing is suspended (§12), the end dates of activities 6–9 move back by the length of the suspension; M3 is fixed by the course deadline.
+
+### 7.4 Actual Schedule
+
+| Phase / Activity | Start | End | Outputs & Milestones | Status |
+|---|---|---|---|---|
+| Sprint 1 | 01-11-2026 | 06-11-2026 | Packaging, order ID validation (#68), back-orders first (#69), arrivals overflow fix (#70), per-item thresholds (#71), Sprint 1 video (#75) | Done |
+| Testing week | 02-11-2026 | 06-11-2026 | v1 test reports; manual test cases TC-REP-01, TC-PERF-01, and TC-SEC-02 executed and passed on 05-11-2026 | Done |
+| Sprint 2 | 07-11-2026 | 09-11-2026 | Run summary (#79), CSV export (#80), coverage gap tests (#81, #84), test cases update (#83), CI report workflows (#82), final reports on 09-11-2026 | Done |
+| Release v1.0 | 09-11-2026 | 09-11-2026 | Final System Validation Report, Deviations Document, 100% test pass rate, release freeze | Done |
+
