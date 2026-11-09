@@ -1,7 +1,7 @@
 ### 3.4.2 Order Manager (`scm_sim.orders`)
 
 #### Responsibility
-The `OrderManager` component is the domain authority for customer demand lifecycle management. It encapsulates the creation, indexing, state tracking, fulfillment, retry scheduling, and cancellation of customer orders. It serves as an intermediary between simulation demand events and warehouse physical stock, enforcing the business rule that order quantities must be fulfilled in their entirety or backordered without partial deduction.
+The `OrderManager` component is the domain authority for customer demand lifecycle management. It encapsulates the creation, indexing, state tracking, fulfillment, retry scheduling, and cancellation of customer orders. It serves as an intermediary between simulation demand events and warehouse physical stock, enforcing the business rule that order quantities must be fulfilled in their entirety or backordered without partial deduction. When invoked during the daily simulation cycle, open back-orders are retried first (oldest-first FIFO) before new daily demand is admitted, ensuring fairness to earlier customers (#69). Furthermore, order creation validates demand quantities prior to identifier allocation so invalid requests fail fast without creating gaps in the sequential identifier counter (#68).
 
 #### Inputs and Outputs
 - **Inputs:**
@@ -20,8 +20,8 @@ The `OrderManager` component is the domain authority for customer demand lifecyc
 - **Read by:** `scm_sim.analytics.order_metrics()`. The analytics engine consumes lists of `Order` entities to evaluate fill rate performance.
 
 #### Requirements Satisfied
-- `SCM-F-010`: Sequential order ID assignment (`ORD-0001`...) and positive quantity validation.
+- `SCM-F-010`: Sequential order ID assignment (`ORD-0001`...) with pre-allocation positive quantity validation preventing sequence gaps (#68).
 - `SCM-F-011`: Full-quantity fulfillment against inventory; automatic transition to `BACKORDERED` upon stock shortfall.
-- `SCM-F-012`: FIFO batch retry of open (`PENDING` and `BACKORDERED`) orders sorted by `(created_day, order_id)`.
+- `SCM-F-012`: FIFO batch retry of open (`PENDING` and `BACKORDERED`) orders sorted by `(created_day, order_id)`, evaluated prior to admitting new same-day customer demand (#69).
 - `SCM-F-013`: Guarded cancellation (forbidding cancellation of `FULFILLED` orders), unique lookup (`get`), and status filtering (`by_status`).
 - `SCM-SR-001`, `SCM-SR-003`: Fail-fast input validation and protected state transitions.
