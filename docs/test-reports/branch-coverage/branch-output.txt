@@ -1,32 +1,32 @@
-============================= test session starts ==============================
-platform linux -- Python 3.14.9, pytest-9.2.0, pluggy-1.7.0
-rootdir: /home/pranav/code/supply-chain-simulator
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Rohanth Ganesha C\.gemini\antigravity-ide\scratch\supply-chain-simulator
 configfile: pytest.ini
 testpaths: tests
 plugins: cov-7.1.0
-collected 84 items
+collected 100 items
 
-tests/test_analytics.py ..........................                       [ 30%]
-tests/test_inventory.py .......................                          [ 58%]
-tests/test_orders.py ........                                            [ 67%]
-tests/test_packaging.py ...                                              [ 71%]
-tests/test_shipments.py ...........                                      [ 84%]
-tests/test_simulator.py .............                                    [100%]
+tests\test_analytics.py .............................                    [ 29%]
+tests\test_inventory.py .........................                        [ 54%]
+tests\test_orders.py ...........                                         [ 65%]
+tests\test_packaging.py ...                                              [ 68%]
+tests\test_shipments.py ...........                                      [ 79%]
+tests\test_simulator.py .....................                            [100%]
 
-================================ tests coverage ================================
-_______________ coverage: platform linux, python 3.14.9-final-0 ________________
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.9-final-0 _______________
 
 Name                       Stmts   Miss Branch BrPart  Cover   Missing
 ----------------------------------------------------------------------
-src/scm_sim/__init__.py        1      0      0      0   100%
-src/scm_sim/__main__.py       20      2      6      2    85%   19, 31
-src/scm_sim/analytics.py      58      0     18      1    99%   83->81
-src/scm_sim/inventory.py      59      1     16      1    97%   58
-src/scm_sim/orders.py         60      3     16      3    92%   25, 62, 73
-src/scm_sim/shipments.py      78      0     22      0   100%
-src/scm_sim/simulator.py     149      6     34      5    94%   104, 173, 228, 244-245, 252
+src\scm_sim\__init__.py        1      0      0      0   100%
+src\scm_sim\__main__.py       33      1     10      1    95%   57
+src\scm_sim\analytics.py      67      0     20      0   100%
+src\scm_sim\inventory.py      59      0     16      0   100%
+src\scm_sim\orders.py         66      0     16      0   100%
+src\scm_sim\shipments.py      88      0     22      0   100%
+src\scm_sim\simulator.py     155      0     36      0   100%
 ----------------------------------------------------------------------
-TOTAL                        425     12    112     12    96%
+TOTAL                        469      1    120      1    99%
 Coverage HTML written to dir docs/test-reports/branch-coverage/html
 Coverage XML written to file docs/test-reports/branch-coverage/coverage.xml
-============================== 84 passed in 1.80s ==============================
+============================= 100 passed in 1.56s =============================
