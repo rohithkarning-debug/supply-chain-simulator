@@ -1,4 +1,4 @@
-﻿### 5.1 Security Validation
+#### 5.1 Security Validation
 
 As established by the Security Test Engineer (Rishi J Mule), security and data integrity testing validates that the simulator resists invalid inputs, prevents ledger corruption, and enforces development governance standards as specified in SRS §5.1 (SCM-SO-1, SCM-SO-2, SCM-SR-001 through SCM-SR-007).
 

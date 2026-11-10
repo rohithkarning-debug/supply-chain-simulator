@@ -13,7 +13,9 @@
 | Expected result | 1. Each of the four raises `ValueError`. 2. `False` at 21, `True` at 20 (the reorder point itself triggers a reorder). 3. `False` at 100, `True` at 101 (only levels above max level are excess). 4. Exactly `[("WH1", "SKU1", 40), ("WH1", "SKU2", 100), ("WH2", "SKU1", 100)]`: the policy-only item and the sold-out item are included, the healthy `SKU9` is not, and the list is sorted by warehouse then SKU. 5. The first snapshot equals `{("WH1", "SKU1"): 10, ("WH2", "SKU2"): 5}`; after editing it, `level("WH1", "SKU1") == 10`, `level("WH3", "SKU3") == 0`, and a new snapshot still equals the original values. |
 | Pass/fail criteria | **Pass** if every step gives exactly the expected result and all pytest tests listed below pass. **Fail** if an invalid policy is accepted, a boundary decision is off by one, the suggestion list differs in content or order, or editing a snapshot changes the inventory. |
 | Automated by | `tests/test_inventory.py::test_stock_policy_rejects_invalid_values` (4 parametrised cases), `tests/test_inventory.py::test_needs_reorder_at_boundary`, `tests/test_inventory.py::test_is_excess_only_above_max_level`, `tests/test_inventory.py::test_reorder_suggestions_sorted_and_only_tracked_items`, `tests/test_inventory.py::test_snapshot_returns_independent_copy`. Supporting: `test_stock_policy_defaults` (20 / 100 / 500), `test_stock_policy_allows_max_level_equal_to_reorder_point`, `test_get_policy_returns_default_when_unset`, `test_set_policy_is_per_warehouse_and_sku`, `test_reorder_suggestions_empty_for_new_inventory` |
-| Actual result | Pass (CI run #20, commit b3702ef) |
+| Actual result | Pass. Final automated suite: 100 tests passed. See [final unit-test report](../../test-reports/unit/unit-test-report.md). |
 | Status | Passed |
 
 **Revision 08-11-2026:** Confirmed the documented stock-policy boundaries and reorder suggestion order against the current implementation and automated tests.
+
+**Revision 09-11-2026:** Reconciled final automated-suite evidence to the unit-test report and aligned functional/security scope with the traceability maps.

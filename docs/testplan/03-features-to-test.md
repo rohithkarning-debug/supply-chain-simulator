@@ -2,7 +2,7 @@
 
 This section enumerates every feature of the Supply Chain Management Simulator that is to be tested, mapped to the requirement identifiers defined in the Software Requirements Specification. It is the authoritative list of what this Test Plan covers: a requirement that appears in this section is in scope for verification, and a requirement that does not appear here is either out of scope (Test Plan §4) or an objective rather than a testable requirement.
 
-The identifiers below are taken from the Requirements Registry (`docs/requirements-registry.md`) and match SRS §4, §5 and §5.1 exactly. Thirty-two requirements are in scope: 20 functional, 5 non-functional and 7 security requirements, supported by the two security objectives SCM-SO-1 and SCM-SO-2.
+The identifiers below are taken from the Requirements Registry (`docs/requirements-registry.md`) and match SRS §4, §5 and §5.1 exactly. Thirty-four requirements are in scope: 22 functional, 5 non-functional and 7 security requirements, supported by the two security objectives SCM-SO-1 and SCM-SO-2.
 
 #### 3.1 Feature Group A — Inventory Management
 
@@ -47,6 +47,7 @@ Tests the behaviour of the Analytics component (`src/scm_sim/analytics.py`), the
 | SCM-F-031 | Inventory health classification | A stockout is a quantity of exactly 0; low stock is $0 < qty \le$ reorder point (20 included, 0 and 21 excluded); excess is $qty >$ max level (500 excluded, 501 included) and reports the surplus; each class is returned sorted, and caller-supplied thresholds override the 20 / 500 defaults. | Analytics | Unit | TC-ANA-01 |
 | SCM-F-032 | Order metrics and fill rate | Status counts for `PENDING`, `FULFILLED`, `BACKORDERED` and `CANCELLED` are correct and `total` equals the list length; fill rate is $\text{round}(\text{fulfilled} \div (\text{total} − \text{cancelled}),\ 2)$; it is 0.0 when there are no eligible orders; enumeration members and plain strings are accepted, including mixed in one list. | Analytics | Unit | TC-ANA-02 |
 | SCM-F-033 | Report composition and formatting | `build_report` returns a dictionary whose key set is exactly `{day, delayed_shipments, stockouts, low_stock, excess, orders}` and forwards caller thresholds; `format_report` emits the day header, one counted section per key, one line per item, and the text `No issues` for every empty section. | Analytics | Unit | TC-ANA-02 |
+| SCM-F-034 | Run summary aggregation and display | `summarize_run` returns the count of days, the number of days with delays / stockouts / low stock / excess, the peak delayed-shipments count, and the final fill rate; `format_run_summary` prints a single `=== Run Summary ===` block, displayed by the CLI when `--summary` is supplied. | Analytics / CLI | Unit / System | TC-ANA-02, TC-SIM-02 |
 
 #### 3.5 Feature Group E — Simulation Engine and Command-Line Interface
 
@@ -55,9 +56,10 @@ Tests the orchestration layer and its user-facing entry point.
 | Req ID | Feature to be tested | Verifiable behaviour | Component | Test level | Test case |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | SCM-F-040 | Scenario configuration | Suppliers, warehouses with capacity, per-item policies linked to a supplier, initial stock and orders scheduled for future days can all be configured; a day in the past, a quantity $\le 0$ and an unknown warehouse are each rejected with the appropriate exception. | Simulation Engine | System | TC-SIM-02 |
-| SCM-F-041 | Daily time-step and report retention | `step` advances the day counter and executes arrivals, today's orders, back-order retry, replenishment and report construction in that fixed order; `run(days)` returns one report per day and `run(-1)` raises `ValueError`. | Simulation Engine | Integration | TC-SIM-01 |
+| SCM-F-041 | Daily time-step and report retention | `step` advances the day counter and executes arrivals, back-order retry, today's orders, replenishment and report construction in that fixed order; `run(days)` returns one report per day and `run(-1)` raises `ValueError`. | Simulation Engine | Integration | TC-SIM-01 |
 | SCM-F-042 | Automatic replenishment | Exactly one replenishment is dispatched per item that needs reorder while nothing is in transit for it; the quantity is trimmed so that on-hand plus in-transit stock never exceeds the warehouse capacity. | Simulation Engine | Integration | TC-SIM-01 |
-| SCM-F-043 | Command-line interface | `python -m scm_sim --days N --seed S` runs the demo, prints the day-by-day log and the final report, and exits with code 0; `--days` below 1 produces a usage error with exit code 2. | CLI | System | TC-SIM-02 |
+| SCM-F-043 | Command-line interface | `scm-sim` or `python -m scm_sim --days N --seed S` runs the demo, prints the day-by-day log and the final report, and exits with code 0; `--days` below 1 produces a usage error with exit code 2. | CLI | System | TC-SIM-02 |
+| SCM-F-044 | Daily metrics CSV export | `--csv PATH` writes one metrics row per simulated day with the required header columns. | CLI | System | TC-SIM-02 |
 
 #### 3.6 Feature Group F — Non-Functional and Cross-Cutting Features
 

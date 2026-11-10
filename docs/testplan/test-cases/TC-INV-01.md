@@ -13,7 +13,9 @@
 | Expected result | 1. Returns 50. 2. Returns 30. 3. Raises `InsufficientStockError`. 4. Both calls raise `ValueError("qty must be positive")`. 5. The second add returns 40; the warehouse total is exactly 100 (adding up to capacity is allowed). 6. The second add raises `CapacityExceededError`; afterwards `level("WH1", "SKU1") == 60`, `level("WH1", "SKU2") == 0` and the total is 60 (stock unchanged). 7. Returns 1 000 000 (the unregistered `WH2` has no limit). |
 | Pass/fail criteria | **Pass** if every step gives exactly the expected return value or exception and all pytest tests listed below pass. **Fail** if any value differs, the wrong exception (or none) is raised, or stock changes after a rejected call. |
 | Automated by | `tests/test_inventory.py::test_add_and_level`, `tests/test_inventory.py::test_remove_reduces_stock`, `tests/test_inventory.py::test_remove_too_much_raises`, `tests/test_inventory.py::test_remove_rejects_non_positive_quantity`, `tests/test_inventory.py::test_add_up_to_exact_capacity_is_allowed`, `tests/test_inventory.py::test_add_beyond_capacity_raises_and_leaves_stock_unchanged`, `tests/test_inventory.py::test_unregistered_warehouse_has_unlimited_capacity`. Supporting: `test_stockout_detected`, `test_register_warehouse_rejects_non_positive_capacity`, `test_total_in_warehouse_sums_all_skus`, `test_existing_behaviour_unchanged_with_capacity_registered` |
-| Actual result | Pass (94 tests; commit 2a1e8d8 plus local coverage-gap tests) |
+| Actual result | Pass. Final automated suite: 100 tests passed. See [final unit-test report](../../test-reports/unit/unit-test-report.md). |
 | Status | Passed |
 
 **Revision 08-11-2026:** Added automated coverage for zero and negative removal quantities, aligned warehouse capacity steps with the current implementation, and removed the obsolete coverage gap note.
+
+**Revision 09-11-2026:** Reconciled final automated-suite evidence to the unit-test report and aligned functional/security scope with the traceability maps.
