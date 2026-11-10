@@ -1,7 +1,7 @@
 ### 3.4.4 Analytics Component
 
 #### Component Overview
-The **Analytics** component (`scm_sim.analytics`) is the read-only observation layer of the simulator. It transforms the plain state snapshots produced by the domain modules into the operational findings that the Supply Chain Analyst needs: which inbound shipments are late and by how many days, which items are stocked out, low or in excess, and how the order book is performing. It is implemented as seven module-level functions, all of which are **pure**: they read their arguments, return new data structures, and never mutate any argument or any module-level variable. The component holds **no internal state** and is instantiated never — it is used only as a namespace of functions.
+The **Analytics** component (`scm_sim.analytics`) is the read-only observation layer of the simulator. It transforms the plain state snapshots produced by the domain modules into the operational findings that the Supply Chain Analyst needs: which inbound shipments are late and by how many days, which items are stocked out, low or in excess, how the order book is performing, and how metrics aggregate across a complete run. It is implemented as nine module-level functions, all of which are **pure**: they read their arguments, return new data structures, and never mutate any argument or any module-level variable. The component holds **no internal state** and is instantiated never — it is used only as a namespace of functions.
 
 #### Architectural Responsibilities
 1. **Late-shipment detection (`find_delayed_shipments`):** Compares each shipment's expected arrival day against its actual arrival day when it has been delivered, or against the current simulation day when it is still in transit, and reports only those that are strictly late, ordered worst first.
@@ -9,9 +9,11 @@ The **Analytics** component (`scm_sim.analytics`) is the read-only observation l
 3. **Order performance aggregation (`order_metrics`):** Counts orders per lifecycle status and derives the fill rate as fulfilled orders over eligible orders, rounded to two decimal places.
 4. **Report composition (`build_report`):** Combines the outputs of the five classifiers above into a single daily report dictionary with a fixed key set, so that the daily time-step has exactly one artefact to store and print.
 5. **Report presentation (`format_report`):** Renders a report dictionary as a stable multi-line text block with one counted section per key and an explicit "No issues" marker for empty sections, so that an absence of problems is visible rather than ambiguous.
+6. **Run summary aggregation (`summarize_run`):** Aggregates day counts, issue-day counts, peak delayed shipments and the final fill rate from retained daily reports (SCM-F-034).
+7. **Run summary presentation (`format_run_summary`):** Renders the aggregate as a readable multi-line summary for the CLI.
 
 #### Public Interface
-The component exports exactly seven functions and one type hint convention; it exports no classes, no constants and no exceptions of its own.
+The component exports exactly nine functions and one type hint convention; it exports no classes, no constants and no exceptions of its own.
 
 | Function | Returns |
 | :--- | :--- |
@@ -22,6 +24,8 @@ The component exports exactly seven functions and one type hint convention; it e
 | `order_metrics(orders)` | `dict` with keys `total`, `pending`, `fulfilled`, `backordered`, `cancelled`, `fill_rate` |
 | `build_report(stock, shipments, orders, current_day, reorder_point=20, max_level=500)` | `dict` with keys `day`, `delayed_shipments`, `stockouts`, `low_stock`, `excess`, `orders` |
 | `format_report(report)` | `str` — the rendered multi-line report |
+| `summarize_run(history)` | `dict` with run length, issue-day counts, peak delayed-shipment count and final fill rate |
+| `format_run_summary(summary)` | `str` — the rendered multi-line run summary |
 
 The complete signature, parameter, return and example detail for each call is given in SAD §4.3.4.
 
@@ -36,7 +40,7 @@ The complete signature, parameter, return and example detail for each call is gi
   - New lists, dictionaries and strings. Every returned container is freshly allocated, so the caller may store, mutate or discard the result without affecting the simulator.
 
 #### Collaborators and Dependencies
-The Analytics component has **no collaborators and no dependencies**. It imports only `from __future__ import annotations` and `from typing import Any` from the Python standard library. It does not import `Inventory`, `OrderManager`, `ShipmentManager` or `Simulation`, and those modules do not import it; the coupling is one-way and expressed entirely through the `Simulation` orchestration layer, which calls `build_report` and `format_report` as steps 5 and 6 of the daily time-step. This satisfies the dependency direction defined in SAD §3.5 (CLI → Simulation → domain modules; analytics depends on nothing) and is what makes the component trivially unit-testable: the test suite constructs stand-ins with `types.SimpleNamespace` rather than building a simulation.
+The Analytics component has **no collaborators and no dependencies**. It imports only `from __future__ import annotations` and `from typing import Any` from the Python standard library. It does not import `Inventory`, `OrderManager`, `ShipmentManager` or `Simulation`, and those modules do not import it; the coupling is one-way and expressed entirely through the `Simulation` orchestration layer, which calls the daily-report functions during each time-step and the run-summary functions when requested by the CLI. This satisfies the dependency direction defined in SAD §3.5 (CLI → Simulation → domain modules; analytics depends on nothing) and is what makes the component trivially unit-testable: the test suite constructs stand-ins with `types.SimpleNamespace` rather than building a simulation.
 
 #### Internal State Structures
 None. There are no instance attributes, no module-level mutable globals and no caches. Every function is referentially transparent with respect to its arguments, which is why the component contributes no state that could be corrupted and raises no security requirement of its own beyond SCM-SR-007 (returned data is a copy).
