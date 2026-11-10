@@ -1,4 +1,4 @@
-﻿| Field | Content |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-SEC-01 |
 | **Title** | Public Input Validation, Invariant Enforcement, and State Tamper Resistance |
@@ -11,10 +11,11 @@
 | **Expected result** | `ValueError` raised for invalid parameters with state left unchanged; `InsufficientStockError` and `CapacityExceededError` raised with inventory intact; `cancel()` on FULFILLED raises `ValueError`; unknown entity references raise `KeyError`; mutating returned snapshot has zero effect on internal inventory. |
 | **Pass/fail criteria** | **Pass** if all invalid input vectors are rejected, state invariants remain uncompromised, and snapshots are independent; **Fail** if state corruption, silent mutation, or unhandled crashes occur. |
 | **Automated by** | `tests/test_inventory.py::test_remove_rejects_non_positive_quantity`<br>`tests/test_inventory.py::test_remove_too_much_raises`<br>`tests/test_inventory.py::test_register_warehouse_rejects_non_positive_capacity`<br>`tests/test_inventory.py::test_add_beyond_capacity_raises_and_leaves_stock_unchanged`<br>`tests/test_inventory.py::test_stock_policy_rejects_invalid_values`<br>`tests/test_inventory.py::test_snapshot_returns_independent_copy`<br>`tests/test_orders.py::test_invalid_quantity`<br>`tests/test_orders.py::test_rejected_order_does_not_consume_an_id`<br>`tests/test_orders.py::test_order_dataclass_rejects_non_positive_quantity_directly`<br>`tests/test_orders.py::test_get_unknown_order_raises_key_error`<br>`tests/test_orders.py::test_cancel_rules`<br>`tests/test_orders.py::test_fulfilled_or_cancelled_orders_are_never_reprocessed`<br>`tests/test_shipments.py::test_supplier_validation`<br>`tests/test_shipments.py::test_add_supplier_and_reject_duplicate_and_unknown`<br>`tests/test_shipments.py::test_reject_non_positive_quantity`<br>`tests/test_simulator.py::test_schedule_order_validates_input`<br>`tests/test_simulator.py::test_set_policy_rejects_unknown_supplier` |
-| **Actual result** | Pass. Final automated suite: 100 tests passed. See [final unit-test report](../../test-reports/unit/unit-test-report.md). |
+| **Actual result** | Pass. Final automated suite: 100 tests passed. See [final unit-test report](../../test-reports/unit/unit-test-report.md) and execution evidence [docs/testplan/results/TC-SEC-01.md](../results/TC-SEC-01.md). |
 | **Status** | Passed |
 
 Reviewed 08-11-2026: no change needed after Sprint 2.
 Updated 08-11-2026: verified all security and input validation tests pass on current main (#62); final suite evidence reconciled 09-11-2026.
+Updated 10-11-2026: recorded dedicated execution evidence report in docs/testplan/results/TC-SEC-01.md.
 
 **Revision 09-11-2026:** Expanded the automated-test mapping for invalid inputs, unknown order IDs and closed-order protection; all names verified against `tests/`.
