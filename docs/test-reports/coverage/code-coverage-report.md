@@ -1,9 +1,9 @@
-# Code Coverage Report — Final (v1.0)
+# Code Coverage Report — Final (v1.1)
 
 | Field | Value |
 |---|---|
 | Report name | Code Coverage Report |
-| Version | Final (v1.0) |
+| Version | Final (v1.1) |
 | Prepared by | Rohanth Ganesha C |
 | Date | 09-11-2026 |
 | Commit tested | f4dc0e8 |
@@ -13,7 +13,9 @@
 
 ## Result
 
-Total line coverage: **99%** (469 statements, 1 missed) — 90% target MET (exceeds requirement SCM-NF-003).
+Total line coverage: **99.79%** (468 / 469 statements covered) — 90% target MET (exceeds requirement SCM-NF-003). With branch measurement enabled, branch coverage is 99.17% and combined line + branch coverage is 99.66%.
+
+**Revision 09-11-2026:** Added exact percentage values from the reported covered/total line and branch counts. No test execution or source evidence was changed.
 
 ## Per-module coverage
 
@@ -26,7 +28,7 @@ Total line coverage: **99%** (469 statements, 1 missed) — 90% target MET (exce
 | src/scm_sim/orders.py | 66 | 0 | 100% | Rohanth |
 | src/scm_sim/shipments.py | 88 | 0 | 100% | Rishi |
 | src/scm_sim/simulator.py | 155 | 0 | 100% | Rohith |
-| **TOTAL** | **469** | **1** | **99%** | |
+| **TOTAL** | **469** | **1** | **99.79%** | |
 
 ## Uncovered lines and reasons
 
@@ -36,7 +38,7 @@ Total line coverage: **99%** (469 statements, 1 missed) — 90% target MET (exce
 
 ## Changes since v1
 
-Statement coverage improved from 97% (425 stmts, 12 missed) to **99%** (469 stmts, 1 missed).
+Statement coverage improved from 97% (425 stmts, 12 missed) to **99.79%** (468 / 469 statements covered).
 - **`inventory.py`**: 98% -> **100%** (closed missing validation raise on line 58 via #60).
 - **`orders.py`**: 95% -> **100%** (closed missing validation and lookup raises on lines 25, 62, 73 via #59, #84).
 - **`simulator.py`**: 96% -> **100%** (closed missing validation paths on lines 104, 173, 228, 244-245, 252 via #60).

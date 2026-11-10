@@ -22,10 +22,12 @@ This section maps every requirement defined in the Software Requirements Specifi
 | SCM-F-031 | Report stockouts, low stock and excess with surplus | **Analytics** (`scm_sim.analytics`) | Inventory (supplies the stock snapshot) | SAD §3.4.4, §4.3.4 | TC-ANA-01 |
 | SCM-F-032 | Order metrics per status and fill rate | **Analytics** (`scm_sim.analytics`) | Order Manager (supplies the orders) | SAD §3.4.4, §4.3.4 | TC-ANA-02 |
 | SCM-F-033 | Build the daily report and format it as readable text | **Analytics** (`scm_sim.analytics`) | Simulation Engine and CLI (consume the report) | SAD §3.4.4, §4.3.4 | TC-ANA-02 |
+| SCM-F-034 | Aggregate and format a multi-day run summary, displayed with `--summary` | **Analytics** (`scm_sim.analytics`) | Simulation Engine and CLI (request and display the summary) | SAD §3.4.1, §3.4.4, §4.3.1, §4.3.4 | TC-ANA-02, TC-SIM-02 |
 | SCM-F-040 | Configure a scenario | **Simulation Engine** (`scm_sim.simulator`) | Inventory, Shipment Manager, Order Manager | SAD §3.4.1, §4.3.1 | TC-SIM-02 |
 | SCM-F-041 | Advance one day in the fixed order, keep every report | **Simulation Engine** (`scm_sim.simulator`) | Analytics (builds the report at step 5) | SAD §3.4.1, §4.1 | TC-SIM-01 |
 | SCM-F-042 | Automatic replenishment trimmed to capacity | **Simulation Engine** (`scm_sim.simulator`) | Inventory (`reorder_suggestions`), Shipment Manager (`dispatch`) | SAD §3.4.1, §4.1 | TC-SIM-01 |
-| SCM-F-043 | Command-line interface, exit code 0 | **CLI** (`scm_sim.__main__`) | Simulation Engine (`build_demo`, `run`) | SAD §3.4.1, §4.5 | TC-SIM-02 |
+| SCM-F-043 | Command-line interface, invocation and exit behavior | **CLI** (`scm_sim.__main__`) | Simulation Engine (`build_demo`, `run`) | SAD §3.4.1, §4.5 | TC-SIM-02 |
+| SCM-F-044 | Daily metrics CSV export with `--csv PATH` | **CLI** (`scm_sim.__main__`) | Simulation Engine (`metrics_rows`) | SAD §3.4.1, §4.3.1 | TC-SIM-02 |
 
 #### 3.8.2 Non-Functional Requirements
 
@@ -60,9 +62,9 @@ The two security objectives are architectural in nature and are realised through
 | **Inventory** | SCM-F-001, SCM-F-002, SCM-F-003, SCM-F-004 | SCM-SR-002, SCM-SR-007 |
 | **Order Manager** | SCM-F-010, SCM-F-011, SCM-F-012, SCM-F-013 | SCM-SR-003, SCM-SR-004 |
 | **Shipment Manager** | SCM-F-020, SCM-F-021, SCM-F-022, SCM-F-023 | SCM-SR-004, SCM-SR-006 |
-| **Analytics** | SCM-F-030, SCM-F-031, SCM-F-032, SCM-F-033 | SCM-SR-007, SCM-NF-002, SCM-NF-005 |
-| **Simulation Engine** | SCM-F-040, SCM-F-041, SCM-F-042 | SCM-SR-001, SCM-NF-001, SCM-NF-002 |
-| **CLI** | SCM-F-043 | SCM-NF-005 |
+| **Analytics** | SCM-F-030, SCM-F-031, SCM-F-032, SCM-F-033, SCM-F-034 | SCM-SR-007, SCM-NF-002, SCM-NF-005 |
+| **Simulation Engine** | SCM-F-040, SCM-F-041, SCM-F-042 | SCM-F-044, SCM-SR-001, SCM-NF-001, SCM-NF-002 |
+| **CLI** | SCM-F-043, SCM-F-044 | SCM-F-034, SCM-NF-005 |
 | **CI Pipeline** | SCM-NF-003 | SCM-SR-005, SCM-SR-006, SCM-NF-004 |
 
-Every one of the 32 requirement IDs (20 functional, 5 non-functional, 7 security) appears in exactly one "primary component" cell above, and every component in the component diagram of SAD §3.3 implements at least one requirement. No component is orphaned and no requirement is unimplemented.
+Every one of the 34 requirement IDs (22 functional, 5 non-functional, 7 security) appears in exactly one "primary component" cell above, and every component in the component diagram of SAD §3.3 implements at least one requirement. No component is orphaned and no requirement is unimplemented.

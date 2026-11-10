@@ -1,4 +1,4 @@
-| Field | Content |
+﻿| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-SHP-01 |
 | **Title** | Supplier Validation, Identifier Sequencing, and Dispatch Lead-Time Computation |
@@ -11,8 +11,8 @@
 | **Expected result** | Invalid parameters and duplicate supplier registrations raise `ValueError`; unknown supplier dispatches raise `KeyError`; non-positive quantities raise `ValueError`; generated shipment IDs follow `SHP-0001`, `SHP-0002`; `expected_day` strictly equals `2 + 3 = 5`. |
 | **Pass/fail criteria** | **Pass** if all assertions hold and exceptions are raised without state mutation; **Fail** if invalid parameters are accepted, IDs collide, or `expected_day` is miscalculated. |
 | **Automated by** | `tests/test_shipments.py::test_supplier_validation`<br>`tests/test_shipments.py::test_add_supplier_and_reject_duplicate_and_unknown`<br>`tests/test_shipments.py::test_expected_day_calculated_from_lead_time`<br>`tests/test_shipments.py::test_shipment_id_sequence_and_in_transit_filtering`<br>`tests/test_shipments.py::test_reject_non_positive_quantity` |
-| **Actual result** | Pass (100 tests; commit 2f6d382) |
+| **Actual result** | Pass. Final automated suite: 100 tests passed. See [final unit-test report](../../test-reports/unit/unit-test-report.md). |
 | **Status** | Passed |
 
 Reviewed 08-11-2026: no change needed after Sprint 2.
-Updated 10-11-2026: verified baseline tests pass on final main (100 tests, commit 2f6d382)
+Updated 08-11-2026: verified baseline tests pass on current main (#62); final suite evidence reconciled 09-11-2026.

@@ -10,7 +10,7 @@ This document defines the architectural blueprint, component design, runtime exe
 
 #### 2.2 Related Documents
 The architecture documented herein directly realizes the functional requirements, quality attributes, and verification plans defined across the core engineering deliverables:
-1. **Software Requirements Specification (SRS) v1.0:** Defines the 20 functional requirements (`SCM-F-001`–`SCM-F-043`), 5 non-functional requirements (`SCM-NF-001`–`SCM-NF-005`), and security requirements (`SCM-SR-001`–`SCM-SR-007`).
-2. **Test Plan v1.0:** Establishes the 15 system test cases (`TC-INV-01`–`TC-REP-01`), coverage criteria, entry/exit criteria, and automated test automation mapping.
+1. **Software Requirements Specification (SRS) v1.1:** Defines the 22 functional requirements (`SCM-F-001`–`SCM-F-044`), 5 non-functional requirements (`SCM-NF-001`–`SCM-NF-005`), and security requirements (`SCM-SR-001`–`SCM-SR-007`).
+2. **Test Plan v1.1:** Establishes the 15 system test cases (`TC-INV-01`–`TC-REP-01`), coverage criteria, entry/exit criteria, and automated test automation mapping.
 3. **Requirements Traceability Matrix (RTM) (SRS Section 8):** Maps each requirement ID to its architectural module, design section, and verifying test suite.
 4. **Repository Documentation (`README.md`):** Outlines repository structure, execution instructions, CLI usage parameters, and developer setup.

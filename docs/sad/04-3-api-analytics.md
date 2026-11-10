@@ -1,18 +1,20 @@
 ### 4.3.4 Analytics API (`scm_sim.analytics`)
 
-The Analytics component exports seven module-level functions and no classes. Every function is **pure**: it reads only its arguments, allocates and returns new containers, and never mutates an argument, never touches module-level state and never raises an exception of its own. The component imports only `from __future__ import annotations` and `from typing import Any` from the Python standard library, and depends on no other component — the coupling is entirely through the data the caller passes in (SAD §3.4.4).
+The Analytics component exports nine public module-level functions and no classes. Every function is **pure**: it reads only its arguments, allocates and returns new containers, and never mutates an argument or module-level state. It imports `Any`, `Mapping` and `Optional` from the standard library and depends on no other `scm_sim` component; its coupling is through caller-supplied data (SAD §3.4.4).
 
-**A note on the Raises column.** Every entry below reads "None". This is accurate and deliberate: Analytics mutates nothing, so it has no state to protect and therefore performs no input validation. `find_low_stock` will accept a negative `reorder_point` and simply return an empty list; `format_report` will raise `KeyError` only if handed a dictionary that is missing a key, which is a programming error in the caller rather than bad data from the simulation. Domain components such as `Inventory` and `ShipmentManager` validate aggressively (SCM-SR-001); Analytics is deliberately not one of them, and must not be described as if it were.
+**Input and error behaviour.** Analytics does not validate its inputs. Its functions do not mutate state; malformed caller data can still cause normal Python exceptions (for example, `AttributeError` for a missing object attribute or `KeyError` for a missing report key). Negative threshold values are accepted as supplied. Domain components validate operational input (SCM-SR-001); Analytics is a read-only reporting layer.
 
 | # | Function | Purpose |
 | :--- | :--- | :--- |
 | 1 | `find_delayed_shipments(shipments, current_day)` | Detect shipments that are later than their expected arrival day. |
 | 2 | `find_stockouts(stock)` | Detect items whose quantity is exactly zero. |
-| 3 | `find_low_stock(stock, reorder_point=20)` | Detect items at or below the reorder point but above zero. |
-| 4 | `find_excess(stock, max_level=500)` | Detect items above the max level, with the surplus quantity. |
+| 3 | `find_low_stock(stock, reorder_point=20, policies=None)` | Detect items at or below the item policy's reorder point, or the fallback threshold, but above zero. |
+| 4 | `find_excess(stock, max_level=500, policies=None)` | Detect items above the item policy's max level, or the fallback threshold, with the surplus quantity. |
 | 5 | `order_metrics(orders)` | Count orders per status and compute the fill rate. |
-| 6 | `build_report(stock, shipments, orders, current_day, reorder_point=20, max_level=500)` | Compose findings 1–5 into one daily report dictionary. |
+| 6 | `build_report(stock, shipments, orders, current_day, reorder_point=20, max_level=500, policies=None)` | Compose findings 1–5 into one daily report dictionary. |
 | 7 | `format_report(report)` | Render a report dictionary as readable multi-line text. |
+| 8 | `summarize_run(history)` | Aggregate report counts and final fill rate across a run. |
+| 9 | `format_run_summary(summary)` | Render a run-summary dictionary as readable multi-line text. |
 
 ---
 
@@ -55,13 +57,14 @@ find_stockouts({("WH-NORTH", "WIDGET"): 0, ("WH-NORTH", "GADGET"): 1})
 
 ---
 
-#### 3. `find_low_stock(stock, reorder_point=20)`
+#### 3. `find_low_stock(stock, reorder_point=20, policies=None)`
 
-- **Signature:** `find_low_stock(stock: dict[tuple[str, str], int], reorder_point: int = 20) -> list[tuple[str, str, int]]`
+- **Signature:** `find_low_stock(stock: dict[tuple[str, str], int], reorder_point: int = 20, policies: Optional[Mapping[tuple[str, str], Any]] = None) -> list[tuple[str, str, int]]`
 - **Parameters:**
   - `stock` (`dict`): The stock snapshot keyed by `(warehouse_id, sku)`.
   - `reorder_point` (`int`, default `20`): The inclusive upper bound of the low-stock band. The default matches the default `StockPolicy(reorder_point=20)`.
-- **Returns:** A `list` of `(warehouse_id, sku, qty)` tuples for every item where $0 < qty \le$ `reorder_point`, sorted ascending by `warehouse_id` then `sku`. A quantity of 0 is **excluded** — that is a stockout, reported by `find_stockouts`, not low stock. A quantity of exactly `reorder_point` is **included**. Returns an empty list when no item is in the band.
+- `policies` (`Mapping`, default `None`): Optional map from `(warehouse_id, sku)` to an object exposing `reorder_point`; when an item is present, this value takes precedence over the fallback `reorder_point`.
+- **Returns:** A `list` of `(warehouse_id, sku, qty)` tuples for every item where $0 < qty \le$ the applicable threshold (item policy when present, otherwise `reorder_point`), sorted ascending by warehouse and SKU. A quantity of 0 is **excluded** — that is a stockout, reported by `find_stockouts`, not low stock. A quantity equal to the threshold is **included**.
 - **Raises:** None.
 - **Example:**
 ```python
@@ -77,13 +80,14 @@ find_low_stock({("WH-NORTH", "BOLT"): 21}, reorder_point=21)
 
 ---
 
-#### 4. `find_excess(stock, max_level=500)`
+#### 4. `find_excess(stock, max_level=500, policies=None)`
 
-- **Signature:** `find_excess(stock: dict[tuple[str, str], int], max_level: int = 500) -> list[tuple[str, str, int, int]]`
+- **Signature:** `find_excess(stock: dict[tuple[str, str], int], max_level: int = 500, policies: Optional[Mapping[tuple[str, str], Any]] = None) -> list[tuple[str, str, int, int]]`
 - **Parameters:**
   - `stock` (`dict`): The stock snapshot keyed by `(warehouse_id, sku)`.
   - `max_level` (`int`, default `500`): The exclusive lower bound of the excess band. The default matches the default `StockPolicy(max_level=500)`.
-- **Returns:** A `list` of `(warehouse_id, sku, qty, surplus)` tuples for every item where `qty > max_level`, sorted ascending by `warehouse_id` then `sku`. `surplus` is computed as `qty − max_level`, i.e. the quantity held above the threshold. A quantity of exactly `max_level` is **excluded**. Returns an empty list when no item exceeds the threshold.
+- `policies` (`Mapping`, default `None`): Optional map from `(warehouse_id, sku)` to an object exposing `max_level`; when an item is present, this value takes precedence over the fallback `max_level`.
+- **Returns:** A `list` of `(warehouse_id, sku, qty, surplus)` tuples for every item where `qty` exceeds its applicable threshold, sorted ascending by warehouse and SKU. `surplus` is `qty − applicable threshold`. A quantity equal to the threshold is **excluded**.
 - **Raises:** None.
 - **Example:**
 ```python
@@ -120,9 +124,9 @@ order_metrics([])["fill_rate"]   # 0.0
 
 ---
 
-#### 6. `build_report(stock, shipments, orders, current_day, reorder_point=20, max_level=500)`
+#### 6. `build_report(stock, shipments, orders, current_day, reorder_point=20, max_level=500, policies=None)`
 
-- **Signature:** `build_report(stock: dict[tuple[str, str], int], shipments: list[Any], orders: list[Any], current_day: int, reorder_point: int = 20, max_level: int = 500) -> dict[str, Any]`
+- **Signature:** `build_report(stock: dict[tuple[str, str], int], shipments: list[Any], orders: list[Any], current_day: int, reorder_point: int = 20, max_level: int = 500, policies: Optional[Mapping[tuple[str, str], Any]] = None) -> dict[str, Any]`
 - **Parameters:**
   - `stock` (`dict`): The stock snapshot, forwarded unchanged to `find_stockouts`, `find_low_stock` and `find_excess`.
   - `shipments` (`list`): The shipments to inspect, forwarded to `find_delayed_shipments`.
@@ -130,6 +134,7 @@ order_metrics([])["fill_rate"]   # 0.0
   - `current_day` (`int`): The simulation day. It is stored under `day` **and** used as the reference point for in-transit lateness.
   - `reorder_point` (`int`, default `20`): Forwarded to `find_low_stock`.
   - `max_level` (`int`, default `500`): Forwarded to `find_excess`.
+  - `policies` (`Mapping`, default `None`): Optional mapping of item keys to stock-policy-like objects; each item's own thresholds override the fallback arguments.
 - **Returns:** A new `dict` with exactly six keys: `day` (the `current_day` as given), `delayed_shipments`, `stockouts`, `low_stock`, `excess` and `orders` (the dictionary from `order_metrics`). Because the dictionary is freshly allocated on every call, the caller — the Simulation Engine — may retain every daily report for the whole run and compare them later.
 - **Raises:** None.
 - **Example:**
@@ -141,7 +146,7 @@ sorted(report.keys())
 # ['day', 'delayed_shipments', 'excess', 'low_stock', 'orders', 'stockouts']
 report["day"]            # 4
 ```
-- **Notes:** This is the only Analytics entry point the Simulation Engine calls directly; the five classifier functions are used through it in a run, and directly in tests and ad-hoc analysis.
+- **Notes:** This is the only daily-report entry point the Simulation Engine calls directly; it supplies the inventory policies for tracked items and uses the global thresholds only as fallbacks. The five classification/aggregation functions are also used directly in tests and ad-hoc analysis.
 
 ---
 
@@ -176,6 +181,21 @@ print(format_report(build_report({}, [], [], current_day=1)))
 #   fill rate: 0.0
 ```
 
+#### 8. `summarize_run(history)`
+
+- **Signature:** `summarize_run(history: list[dict[str, Any]]) -> dict[str, Any]`
+- **Parameters:** `history` is the ordered list of daily report dictionaries, normally `Simulation.history`.
+- **Returns:** A new dictionary with `days`, `days_with_delays`, `days_with_stockouts`, `days_with_low_stock`, `days_with_excess`, `peak_delayed` and `final_fill_rate`. Day counters count reports containing one or more matching items; `peak_delayed` is the largest delayed-shipment list length on any day. For empty history, counts and `peak_delayed` are zero and `final_fill_rate` is `0.0`.
+- **Raises:** None for a well-formed history; malformed report dictionaries may raise the corresponding Python key/type errors.
+- **Limitations:** This is a set of run-wide counts and final/peak values, not a time series or trend analysis. It does not calculate average delay or time-to-resolution for delayed shipments or inventory issues.
+
+#### 9. `format_run_summary(summary)`
+
+- **Signature:** `format_run_summary(summary: dict[str, Any]) -> str`
+- **Parameters:** A summary dictionary returned by `summarize_run`.
+- **Returns:** A multi-line string headed `=== Run Summary ===` and displaying each of the seven summary fields.
+- **Raises:** `KeyError` if a required summary key is absent.
+
 #### 7.1 Data Formats Consumed and Produced
 
 | Argument | Expected shape | Example | Produced by |
@@ -184,4 +204,7 @@ print(format_report(build_report({}, [], [], current_day=1)))
 | `shipments` | `list` of objects with `shipment_id`, `sku`, `warehouse_id`, `expected_day`, `actual_day` | `Shipment(id="SHP-0001", expected_day=3, actual_day=None)` | `ShipmentManager.in_transit()` / delivered shipments |
 | `orders` | `list` of objects with `status` (`OrderStatus` or `str`) | `Order(id="ORD-0001", status=OrderStatus.FULFILLED)` | `OrderManager.by_status(...)` |
 | `current_day` | `int`, the simulation day | `4` | `Simulation` day counter |
+| `policies` | Optional mapping `{(warehouse_id, sku): object}` exposing `reorder_point` and `max_level` | `{("WH-NORTH", "WIDGET"): StockPolicy(...)}` | `Simulation._build_report` |
 | `report` | `dict` with the six report keys | see `build_report` | `build_report` |
+| `history` | Ordered `list` of daily report dictionaries | `Simulation.history` | `Simulation` |
+| `summary` | Dictionary with run-level count and final-fill-rate keys | `summarize_run(history)` | `summarize_run` |

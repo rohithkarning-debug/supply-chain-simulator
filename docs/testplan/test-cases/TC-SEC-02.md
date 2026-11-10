@@ -16,6 +16,6 @@
 | Actual result | Pass - execution evidence: [docs/testplan/results/TC-SEC-02.md](../results/TC-SEC-02.md) |
 | Status | Passed |
 
-**Pre-check (read-only, 11-10-2026, not a substitute for execution).** The public GitHub API for this repository reported `main` as `protected: true` with required status check `test` and `enforcement_level: everyone`, and all 20 CI runs up to run #20 succeeded. A dry run of the step 4–6 commands on commit `b3702ef` produced the expected output. Approval count, stale-review dismissal, the up-to-date rule, admin enforcement and the force-push and deletion settings can only be read when logged in, so steps 1–3 remain to be executed.
+**Pre-check (read-only, 11-10-2026; not a substitute for execution).** At pre-check time, the public GitHub API reported `main` as `protected: true` with required status check `test` and `enforcement_level: everyone`, and all 20 CI runs up to run #20 succeeded. A dry run of steps 4–6 on commit `b3702ef` produced the expected output. The subsequent full execution on 05-11-2026, including the branch-rule and push/merge checks, is recorded in the linked result report.
 
-**Revision 08-11-2026:** Updated the actual result to Pass and linked the execution evidence.
+**Revision 09-11-2026:** Clarified that the 11-10 pre-check was superseded by the full execution dated 05-11-2026; linked execution evidence remains authoritative.

@@ -11,7 +11,7 @@
 | **Expected result** | 1. Ten reports are produced, one per simulated day.<br>2. Ten reports are produced from the second, independent instance.<br>3. The two lists are equal: every report for day *n* is identical in every key.<br>4. Each run prints a day-by-day log and a final report and exits with code 0.<br>5. The two files are identical (`fc` / `diff` reports no differences).<br>6. The seed-1 run produces different shipment delays from the seed-42 run, and the difference is deterministic.<br>7. The host details are recorded in the test report. |
 | **Pass/fail criteria** | **Pass** if the automated test passes and both seed-42 manual runs produce identical output while the seed-1 run produces repeatable variations; **Fail** if any values differ between identical seeds or match across different seeds. |
 | **Automated by** | `tests/test_simulator.py::test_same_seed_gives_identical_reports` |
-| **Actual result** | Pass (evidence: docs/testplan/results/TC-REP-01.md; 97 tests pass on commit f91dd71) |
+| **Actual result** | Pass; automated report equality and manual CLI comparisons passed. Final automated suite: 100 tests passed. See [reproducibility results](../results/TC-REP-01.md) and [final unit-test report](../../test-reports/unit/unit-test-report.md). |
 | **Status** | Passed |
 
-Updated 08-11-2026: recorded manual test results and updated status to Passed (#61)
+Updated 08-11-2026: recorded manual test results and updated status to Passed (#61); final suite evidence reconciled 09-11-2026.

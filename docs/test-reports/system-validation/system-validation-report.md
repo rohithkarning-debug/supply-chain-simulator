@@ -12,7 +12,7 @@
 | Command | scm-sim --days 10 --seed 42 (plus E2-E6 below) and python -m pytest -q |
 
 ## 1. Scope
-The complete simulator (all modules and the scm-sim command) validated end to end against SRS v1.0: SCM-F-001 to SCM-F-043, SCM-NF-001 to SCM-NF-005, SCM-SO-1, SCM-SO-2 and SCM-SR-001 to SCM-SR-007. Evidence comes from the end-to-end runs below, the automated suite (100 tests passed) and the four manual test cases.
+The complete simulator (all modules and the scm-sim command) validated end to end against SRS v1.1: SCM-F-001 to SCM-F-044, SCM-NF-001 to SCM-NF-005, SCM-SO-1, SCM-SO-2 and SCM-SR-001 to SCM-SR-007. Evidence comes from the end-to-end runs below, the automated suite (100 tests passed) and the four manual test cases.
 
 ## 2. End-to-end runs
 | # | Command | Expected | Actual | Result |
@@ -43,15 +43,17 @@ The complete simulator (all modules and the scm-sim command) validated end to en
 | SCM-F-031 | Stockouts, low stock, excess (per-item limits, #71) | TC-ANA-01 | PASS | E1 (GIZMO excess) | Validated |
 | SCM-F-032 | Order metrics and fill rate | TC-ANA-02 | PASS | E1 (fill rate 1.0) | Validated |
 | SCM-F-033 | Daily report and text format | TC-ANA-02 | PASS | E1 | Validated |
+| SCM-F-034 | Multi-day run summary | TC-ANA-02 | PASS | E5 | Validated |
 | SCM-F-040 | Configure a scenario | TC-SIM-02 | PASS | - | Validated |
 | SCM-F-041 | Daily step order (back-orders first, #69) | TC-SIM-01 | PASS | - | Validated |
 | SCM-F-042 | Automatic replenishment trimmed to capacity | TC-SIM-01 | PASS | - | Validated |
-| SCM-F-043 | Command-line interface (scm-sim, --summary, --csv) | TC-SIM-02 | PASS | E1-E6 | Validated |
+| SCM-F-043 | CLI invocation, usage/help and exit behavior | TC-SIM-02 | PASS | E1-E4 | Validated |
+| SCM-F-044 | Daily metrics CSV export | TC-SIM-02 | PASS | E6 | Validated |
 | SCM-NF-001 | 365-day run and 10-day demo each <= 1 s | TC-PERF-01 | - | PASS (TC-PERF-01.md) | Validated |
 | SCM-NF-002 | Same seed gives identical output | TC-REP-01 | PASS | PASS (TC-REP-01.md) | Validated |
 | SCM-NF-003 | >= 90% coverage, tests pass before merge | TC-COV-01 | PASS (CI gate) | 99% line, 99% line + branch (coverage reports) | Validated |
 | SCM-NF-004 | Python >= 3.11 on Windows, Linux, macOS; stdlib only | TC-COV-01 | PASS (CI on Ubuntu, Python 3.11) | Windows 11 (Python 3.11.9) and Linux (Python 3.14.9) runs pass; macOS not run | Partially validated (macOS not run) |
-| SCM-NF-005 | Auditability / traceability (One command, counts, "No issues", --help, --summary, --csv) | TC-SIM-02 | PASS | E1, E3, E5, E6 | Validated |
+| SCM-NF-005 | Usability (one command, report counts, "No issues", --help) | TC-SIM-02 | PASS | E1, E3 | Validated |
 | SCM-SO-1 | Integrity of simulation data | TC-SEC-01 | PASS | - | Validated (through SR-001 to SR-004, SR-007) |
 | SCM-SO-2 | Integrity and traceability of the codebase | TC-SEC-02 | - | PASS (TC-SEC-02.md) | Validated (through SR-005, SR-006) |
 | SCM-SR-001 | Input validation before state change | TC-SEC-01 | PASS | E2 | Validated |
@@ -79,7 +81,7 @@ The automated test suite contains **100 tests** (increased from 84 in v1), all p
 - Deviations Document: docs/deviations.md (#56)
 
 ## 6. Open defects and conclusion
-No open defects. 33 of 34 requirements are fully validated; SCM-NF-004 is partially validated because the macOS run has not been conducted. All four manual test cases pass, and all 100 automated unit and integration tests pass with 99% line and branch coverage.
+No open defects. 33 of 34 requirements are fully validated; SCM-NF-004 is partially validated because the macOS run has not been conducted. TC-PERF-01, TC-REP-01 and TC-SEC-02 passed; TC-COV-01 passed on Windows and Linux but remains partially validated because macOS was not tested. All 100 automated unit and integration tests passed; the report records coverage rounded to whole percentages.
 
 **Sign-off:**
 - Prepared by: Rishi J Mule (Security Test Engineer) — 09-11-2026

@@ -1,9 +1,9 @@
-# Unit Test Report - Final (v1.0)
+# Unit Test Report - Final (v1.1)
 
 | Field | Value |
 |---|---|
 | Report | Unit Test Report |
-| Version | Final (v1.0) |
+| Version | Final (v1.1) |
 | Prepared by | Rohanth Ganesha C |
 | Date | 09-11-2026 |
 | Commit tested | 30702f8 |
@@ -48,11 +48,12 @@
 ```
 
 ## 5. Changes since v1
-Test count increased from 84 to 100 (+16 tests) closing all functional and branch coverage gaps:
-- **#53 (Run Summary):** Added 3 tests in `tests/test_analytics.py` (`test_summarize_history_counts_days_and_trend`, `test_summarize_history_empty`, `test_format_summary_text`).
-- **#54 (CSV Export):** Added 4 tests in `tests/test_simulator.py` (`test_write_history_csv_one_row_per_day`, `test_cli_csv_export`, `test_cli_csv_and_summary_flags`, `test_cli_reports_unwritable_csv_path`).
+Test count increased from 84 to 100 (+16 tests), closing the identified functional and branch coverage gaps; one script-entry-point branch remains partial as described in the branch-coverage report:
+- **#53 (Run Summary):** Added 2 tests in `tests/test_analytics.py` (`test_summarize_run_and_format`, `test_summarize_run_empty_history`).
+- **#54 (CSV Export):** Added 3 tests in `tests/test_simulator.py` (`test_metrics_rows_has_one_flat_row_per_day`, `test_cli_csv_export`, `test_cli_csv_and_summary_flags`).
 - **#59 (Orders Edge Cases):** Added 3 tests in `tests/test_orders.py` (`test_order_dataclass_rejects_non_positive_quantity_directly`, `test_get_unknown_order_raises_key_error`, `test_fulfilled_or_cancelled_orders_are_never_reprocessed`).
-- **#60 (Simulator & Inventory Gaps):** Added 2 tests in `tests/test_inventory.py` (`test_remove_rejects_non_positive_quantity`, `test_stock_policy_allows_max_level_equal_to_reorder_point`) and 4 tests in `tests/test_simulator.py` (`test_cli_rejects_zero_days`, `test_set_policy_rejects_unknown_supplier`, `test_run_rejects_negative_days`, `test_replenishment_skips_full_warehouse`).
+- **#60 (Simulator & Inventory Gaps):** Added 3 collected cases in `tests/test_inventory.py` (`test_remove_rejects_non_positive_quantity`, with two parameter values; `test_stock_policy_allows_max_level_equal_to_reorder_point`) and 4 tests in `tests/test_simulator.py` (`test_cli_rejects_zero_days`, `test_set_policy_rejects_unknown_supplier`, `test_run_rejects_negative_days`, `test_replenishment_skips_full_warehouse`).
+- **#70 (Shipment Arrival Capacity):** Added `test_capacity_breach_does_not_abort_other_arrivals` in `tests/test_shipments.py`.
 
 ## 6. Failures and defects
 None. 100% pass rate achieved across all 100 automated tests.
@@ -60,3 +61,5 @@ None. 100% pass rate achieved across all 100 automated tests.
 ## 7. Raw evidence
 - junit.xml
 - pytest-output.txt
+
+**Revision 09-11-2026:** Corrected the “Changes since v1” test names and grouping against the current test sources. Execution evidence and pass totals are unchanged.
