@@ -4,22 +4,27 @@
 The system provides a command-line interface (CLI) as its sole user-facing interface. There is no graphical user interface (GUI) or web interface.
 
 1. **Invocation and Command-Line Arguments:**
-   - The user executes the simulator via the standard Python module entry point:
+   - The user executes the simulator either via the installed console script or the standard Python module entry point:
      ```bash
-     python -m scm_sim [--days N] [--seed S]
+     scm-sim [--days N] [--seed S] [--summary] [--csv PATH]
+     # or
+     python -m scm_sim [--days N] [--seed S] [--summary] [--csv PATH]
      ```
    - **`--days N`:** The duration of the simulation run in simulated days (integer). If omitted, the demo defaults to 10 days. The system shall validate that `N >= 1`; if `N < 1`, the CLI shall display a standard usage error message and terminate with exit code 2.
    - **`--seed S`:** The integer seed for the pseudorandom number generator (defaults to 42). Enables deterministic reproducibility across multiple runs.
+   - **`--summary`:** Prints an additional `=== Run Summary ===` block that aggregates the whole run across all simulated days.
+   - **`--csv PATH`:** Writes a CSV file containing one row per day with the metrics `day,delayed,stockouts,low_stock,excess,pending,fulfilled,backordered,cancelled,fill_rate`.
    - **`--help` / `-h`:** Displays usage syntax, available argument flags, and default parameter values, terminating with exit code 0.
 
 2. **Output Formatting and Execution Log:**
-   - During simulation execution, the system shall stream a day-by-day progress line for each simulated day step to standard output (`stdout`), detailing day index, arriving shipments, orders placed, fulfillments, and replenishments dispatched.
+   - During simulation execution, the system shall stream a day-by-day progress line for each simulated day step to standard output (`stdout`), detailing day index, arriving shipments, blocked shipments, order fulfilments and back-orders filled, and replenishments dispatched.
    - Upon completing the specified duration, the system shall render a multi-line formatted summary report (`=== Supply Chain Report: Day N ===`) containing itemized counts for:
      - **Delayed shipments:** Count and item details (shipment ID, SKU, destination warehouse, and days late).
      - **Stockouts:** Count and item details (warehouse ID and SKU with stock level equal to 0).
      - **Low stock:** Count and item details (warehouse ID, SKU, and remaining stock level at or below reorder point).
      - **Excess:** Count and item details (warehouse ID, SKU, total quantity, and surplus units exceeding maximum level).
      - **Orders:** Total orders, counts categorized by status (`pending`, `fulfilled`, `backordered`, `cancelled`), and calculated aggregate fill rate rounded to two decimal places.
+   - If the user passes `--summary`, the CLI shall additionally print a summary block header `=== Run Summary ===` and the run-level counts and final fill rate.
    - If any reporting category contains zero problem instances, the system shall explicitly print `  No issues` under that category header.
    - On successful completion of the run, the process shall terminate with exit code 0.
 

@@ -4,16 +4,17 @@
 | Field | Value |
 |---|---|
 | Project | Supply Chain Management Simulator |
-| Version | 1.0 |
-| Authors | Team NN – Rohith Karning, Rohanth Ganesha C, Rishi J Mule, Pranav Achar |
-| Date | 11-10-2026 |
-| Status | Draft |
+| Version | 1.1 |
+| Authors | Team 02 – Rohith Karning, Rohanth Ganesha C, Rishi J Mule, Pranav Achar |
+| Date | 09-11-2026 |
+| Status | Final (pending approval) |
 
 ### Revision History
 
 | Version | Date | Author(s) | Description of change | Approval |
 |---|---|---|---|---|
-| 1.0 | 11-10-2026 | Team NN | Initial draft | Pending |
+| 1.1 | 09-11-2026 | Team 02 | Updated for Sprint 1 and 2 changes and final documentation audit (see `docs/deviations.md`) | Pending |
+| 1.0 | 11-10-2026 | Team 02 | Initial draft | Pending |
 
 ### Approvals
 
@@ -63,19 +64,19 @@
 
 ### 1.1 Purpose
 
-This Software Requirements Specification (SRS) defines the functional, non-functional and security requirements of the **Supply Chain Management Simulator** (package `scm_sim`), version 1.0. The simulator models the movement of goods from suppliers to warehouses and on to customers, one simulated day at a time. It manages inventory, customer orders and replenishment shipments, and it identifies delayed shipments, stockouts and excess inventory.
+This Software Requirements Specification (SRS) defines the functional, non-functional and security requirements of the **Supply Chain Management Simulator** (package `scm_sim`), document version 1.1. The simulator models the movement of goods from suppliers to warehouses and on to customers, one simulated day at a time. It manages inventory, customer orders and replenishment shipments, and it identifies delayed shipments, stockouts and excess inventory.
 
 The document serves three purposes:
 
-1. It is the agreed baseline of what the system shall do, against which the design (Software Architecture Document, SAD v1.0) and the verification activities (Test Plan v1.0) are traced.
+1. It is the requirements baseline of what the system shall do, against which the design (Software Architecture Document, SAD v1.1) and the verification activities (Test Plan v1.1) are traced.
 2. It assigns every requirement a fixed identifier (`SCM-F-xxx`, `SCM-NF-xxx`, `SCM-SO-x`, `SCM-SR-xxx`) and a measurable acceptance criterion (`AC-SCM-…`) linked to a test case (`TC-XXX-NN`). These identifiers are registered in `docs/requirements-registry.md` and are used unchanged in all three project documents.
-3. It describes the system **as built and merged** on the `main` branch of the team repository (commit `b3702ef`), not a planned or hypothetical product.
+3. It describes the implemented system, including the Sprint 1 and 2 behavior recorded in `docs/deviations.md`; test and coverage evidence is linked from the Test Plan and `docs/test-reports/`.
 
 This SRS follows the structure of IEEE Std 830-1998 and ISO/IEC/IEEE 29148:2018, adapted to the course template.
 
 ### 1.2 Scope
 
-The Supply Chain Management Simulator is a standalone, command-line Python program. A user configures a scenario (suppliers, warehouses, stock policies, initial stock and scheduled customer demand), runs it for a number of days, and receives a day-by-day log plus an analytics report. All data is held in memory for the duration of a run; nothing is stored in files, databases or over a network.
+The Supply Chain Management Simulator is a standalone, command-line Python program. A user configures a scenario (suppliers, warehouses, stock policies, initial stock and scheduled customer demand), runs it for a number of days, and receives a day-by-day log plus analytics reports. Simulation state is held in memory for a run; the optional `--csv PATH` switch exports daily metrics to a user-selected file. The simulator does not persist scenario state in a database or use network storage.
 
 **In scope**
 
@@ -87,8 +88,8 @@ The Supply Chain Management Simulator is a standalone, command-line Python progr
 | Customer orders | Creates orders, fulfils them in full when stock allows, back-orders them otherwise, retries back-orders oldest first, and supports cancellation |
 | Shipments with delays | Dispatches replenishment shipments from suppliers to warehouses; delays are drawn from a seeded random generator according to supplier reliability |
 | Automatic replenishment | Each day, dispatches one replenishment per item at or below its reorder point that has nothing already in transit, trimmed to warehouse capacity |
-| Analytics reports | Reports delayed shipments, stockouts, low stock, excess inventory and order metrics (including fill rate) for every simulated day |
-| CLI demo | `python -m scm_sim --days N --seed S` runs a built-in demonstration scenario and prints the daily log and the final report |
+| Analytics reports | Reports delayed shipments, stockouts, low stock, excess inventory and order metrics (including fill rate) for every simulated day; can summarize a complete run |
+| CLI demo and export | `scm-sim` or `python -m scm_sim` runs the built-in demonstration; `--summary` prints a run summary and `--csv PATH` exports daily metrics |
 
 **Out of scope**
 
