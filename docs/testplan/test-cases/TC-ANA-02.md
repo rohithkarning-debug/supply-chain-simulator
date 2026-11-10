@@ -2,7 +2,7 @@
 | :--- | :--- |
 | **TC ID** | TC-ANA-02 |
 | **Title** | Order Metrics, Fill Rate, Daily Report Composition, Formatting, and Run Summary |
-| **Requirement(s)** | SCM-F-032, SCM-F-033 |
+| **Requirement(s)** | SCM-F-032, SCM-F-033, SCM-F-034 |
 | **Type** | Functional |
 | **Objective** | Verify that `order_metrics` counts orders per status and computes the fill rate accurately, that `build_report` and `format_report` produce complete daily reports with "No issues" for empty sections, and that `summarize_run` and `format_run_summary` aggregate metrics across simulation history. |
 | **Preconditions** | The `scm_sim` package is installed or importable. |
@@ -11,7 +11,7 @@
 | **Expected result** | Status counts and fill rate calculate correctly; cancelled orders are excluded from denominator; empty list gives 0.0 fill rate without ZeroDivisionError; `build_report` produces all guaranteed keys; `format_report` formats headers and "No issues"; `summarize_run` correctly aggregates multi-day run metrics; empty history evaluates cleanly with zeroes; `format_run_summary` outputs header and all summary lines; unknown statuses are counted in total without corrupting status counts. |
 | **Pass/fail criteria** | **Pass** if all listed pytest tests pass, fill rate calculations match formulas, reports are complete, and run summaries aggregate accurately; **Fail** if math errors occur, keys are missing, or summary calculations are incorrect. |
 | **Automated by** | `tests/test_analytics.py::test_order_metrics_counts_with_string_statuses`<br>`tests/test_analytics.py::test_order_metrics_accepts_enum_statuses`<br>`tests/test_analytics.py::test_enum_and_string_statuses_can_be_mixed`<br>`tests/test_analytics.py::test_fill_rate_excludes_cancelled_orders`<br>`tests/test_analytics.py::test_fill_rate_is_zero_with_no_orders`<br>`tests/test_analytics.py::test_fill_rate_is_zero_when_all_cancelled`<br>`tests/test_analytics.py::test_build_report_has_all_keys`<br>`tests/test_analytics.py::test_build_report_contents`<br>`tests/test_analytics.py::test_build_report_passes_custom_thresholds_through`<br>`tests/test_analytics.py::test_format_report_has_section_headers_and_counts`<br>`tests/test_analytics.py::test_format_report_prints_no_issues_for_empty_sections`<br>`tests/test_analytics.py::test_summarize_run_and_format`<br>`tests/test_analytics.py::test_summarize_run_empty_history`<br>`tests/test_analytics.py::test_order_metrics_unknown_status` |
-| **Actual result** | Pass (97 tests; commit f91dd71) |
+| **Actual result** | Pass. Final automated suite: 100 tests passed; run-summary tests pass. See [final unit-test report](../../test-reports/unit/unit-test-report.md). |
 | **Status** | Passed |
 
-Updated 08-11-2026: added summarize_run and format_run_summary tests (#79) (#61)
+Updated 08-11-2026: added run-summary coverage for SCM-F-034 (#79) (#61); final suite evidence reconciled 09-11-2026.

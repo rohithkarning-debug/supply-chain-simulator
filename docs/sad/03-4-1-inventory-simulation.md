@@ -42,10 +42,10 @@ Each component below is described by its responsibility, the interface it provid
 | File / owner | `src/scm_sim/simulator.py` / Rohith Karning |
 | Layer | Orchestration |
 | Responsibility | Holds one scenario and advances it one day at a time. Wires Inventory, Order Manager, Shipment Manager and Analytics together, controls the order of events inside a day, replenishes stock automatically and keeps the history of daily reports. Provides the ready-made demo scenario. |
-| Provided interface | `Simulation`: `add_supplier`, `add_warehouse`, `set_policy`, `add_stock`, `schedule_order`, `step`, `run`, `final_summary`, `all_orders`; attributes `day`, `history`, `logs`, `inventory`, `orders`, `shipments`. Functions `build_demo(seed)` and `describe_day(log, report)`. Dataclasses `ScheduledOrder` and `DayLog`. |
-| Required interface | Inventory, Order Manager, Shipment Manager (public methods only), Analytics `build_report` and `format_report`, standard library `random.Random` |
+| Provided interface | `Simulation`: `add_supplier`, `add_warehouse`, `set_policy`, `add_stock`, `schedule_order`, `step`, `run`, `final_summary`, `all_orders`; module-level functions `build_demo(seed)`, `describe_day(log, report)` and `metrics_rows(history)`. Dataclasses `ScheduledOrder` and `DayLog`. |
+| Required interface | Inventory, Order Manager, Shipment Manager (public methods only), Analytics `build_report`, `format_report`, `summarize_run` and `format_run_summary`, standard library `random.Random` |
 | Used by | CLI; tests in `tests/test_simulator.py` |
-| Requirements | SCM-F-040, SCM-F-041, SCM-F-042; supports SCM-NF-002, SCM-SR-001, SCM-SR-004 |
+| Requirements | SCM-F-040, SCM-F-041, SCM-F-042, SCM-F-044; supports SCM-NF-002, SCM-SR-001, SCM-SR-004 |
 | Tests | `tests/test_simulator.py` (10 test functions); TC-SIM-01, TC-SIM-02, TC-REP-01 |
 
 **Internal data**
@@ -66,8 +66,8 @@ Each component below is described by its responsibility, the interface it provid
 | Stage | Call(s) | Why at this point |
 |---|---|---|
 | 1. Arrivals | `shipments.process_arrivals(day)` | Goods that arrive today can be used today. |
-| 2. Today's orders | `orders.create(…)` then `orders.try_fulfil(order, day)` for each scheduled order | Demand is served from the stock now on hand; each fulfilment removes stock before the next one is checked. |
-| 3. Back-order retry | `orders.process_open(day)` | Any arrival stock left after today's orders goes to waiting orders, oldest first. |
+| 2. Back-order retry | `orders.process_open(day)` | Older open orders are served before today's new demand, so earlier customers are not starved by later ones. |
+| 3. Today's orders | `orders.create(…)` then `orders.try_fulfil(order, day)` for each scheduled order | New demand is served from the stock remaining after back-order retries. |
 | 4. Replenishment | `_replenish(day)` using `inventory.reorder_suggestions()`, `shipments.in_transit()`, `shipments.dispatch(…)` | Reorder decisions see the end-of-day stock after all demand. |
 | 5. Report | `build_report(inventory.snapshot(), shipments.delayed(day), all_orders(), day, …)` | The report shows the final state of the day. |
 
@@ -89,10 +89,10 @@ Each component below is described by its responsibility, the interface it provid
 |---|---|
 | File / owner | `src/scm_sim/__main__.py` / Rohith Karning |
 | Layer | Presentation |
-| Responsibility | Command-line entry point: parses options, runs the demo scenario and prints the day-by-day log and the final report |
-| Provided interface | `python -m scm_sim [--days N] [--seed S]` (defaults 10 and 42); function `main(argv=None) -> int` |
-| Required interface | Simulation Engine `build_demo`, `Simulation.run`, `Simulation.logs`, `Simulation.final_summary`, `describe_day`; standard library `argparse` |
-| Requirements | SCM-F-043, SCM-NF-005 |
+| Responsibility | Command-line entry point: parses options, runs the demo scenario, prints the day-by-day log and final report, and optionally prints a run summary or exports daily metrics as CSV |
+| Provided interface | `scm-sim` or `python -m scm_sim [--days N] [--seed S] [--summary] [--csv PATH]` (defaults 10 and 42); function `main(argv=None) -> int` |
+| Required interface | Simulation Engine `build_demo`, `Simulation.run`, `Simulation.logs`, `Simulation.final_summary`, `metrics_rows(history)`, `describe_day`; Analytics run-summary functions; standard library `argparse`, `csv` |
+| Requirements | SCM-F-043, SCM-F-044; supports SCM-F-034 and SCM-NF-005 |
 | Tests | `test_cli_main_runs`, `test_cli_runs_as_module` in `tests/test_simulator.py`; TC-SIM-02 |
 
 **Behaviour.** `main` parses the arguments with `argparse`; a `--days` value below 1 is reported with `parser.error`, which prints the usage and exits with code 2, and non-integer values are rejected by `argparse` in the same way. It then prints a header line, one block per day produced by `describe_day` (arrivals, fulfilled orders, back-orders, back-orders filled, reorders, and a `flags:` summary line), a blank line and the formatted final report, and returns 0. `main` takes an optional `argv` list so tests can call it directly without starting a new process.
@@ -107,7 +107,7 @@ Each component below is described by its responsibility, the interface it provid
 | Layer | Development infrastructure (not part of the runtime product) |
 | Responsibility | Run the full automated test suite with coverage on every change proposed to, or merged into, `main`, and provide the required status check that gates merging |
 | Triggers | `push` to `main`; `pull_request` targeting `main` |
-| Job | `test` on `ubuntu-latest`: `actions/checkout@v4` → `actions/setup-python@v5` (Python 3.11) → `pip install -r requirements.txt` → `pytest -v --cov=scm_sim` |
+| Job | `test` on `ubuntu-latest`: `actions/checkout@v5` → `actions/setup-python@v6` (Python 3.11) → install test requirements and editable package → `pytest -v --cov=scm_sim --cov-branch --cov-fail-under=90` with terminal, HTML, XML and JUnit reports |
 | Requirements | SCM-NF-003, SCM-SR-005; supports SCM-NF-004 (Linux run) and SCM-SO-2 |
 | Evidence | 20 of 20 workflow runs successful up to run #20 on commit `b3702ef` (11-10-2026): 73 tests passed, 97% line coverage |
 

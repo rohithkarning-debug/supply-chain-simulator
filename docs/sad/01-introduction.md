@@ -4,16 +4,17 @@
 | Field | Value |
 |---|---|
 | Project | Supply Chain Management Simulator |
-| Version | 1.0 |
-| Authors | Team NN – Rohith Karning, Rohanth Ganesha C, Rishi J Mule, Pranav Achar |
-| Date | 11-10-2026 |
-| Status | Draft |
+| Version | 1.1 |
+| Authors | Team 02 – Rohith Karning, Rohanth Ganesha C, Rishi J Mule, Pranav Achar |
+| Date | 09-11-2026 |
+| Status | Final (pending approval) |
 
 ### Revision History
 
 | Version | Date | Author(s) | Description of change | Approval |
 |---|---|---|---|---|
-| 1.0 | 11-10-2026 | Team NN | Initial draft | Pending |
+| 1.1 | 09-11-2026 | Team 02 | Updated for Sprint 1 and 2 changes and final documentation audit (see `docs/deviations.md`) | Pending |
+| 1.0 | 11-10-2026 | Team 02 | Initial draft | Pending |
 
 ### Approvals
 
@@ -63,11 +64,11 @@
 
 ### 1.1 Purpose
 
-This Software Architecture Document (SAD) describes the architecture and detailed design of the **Supply Chain Management Simulator** (Python package `scm_sim`), version 1.0. It explains how the system is decomposed into components, how those components depend on and interact with each other, which architectural pattern was chosen and why, and how each component's public interface behaves, including its errors.
+This Software Architecture Document (SAD) describes the architecture and detailed design of the **Supply Chain Management Simulator** (Python package `scm_sim`), document version 1.1. It explains how the system is decomposed into components, how those components depend on and interact with each other, which architectural pattern was chosen and why, and how each component's public interface behaves, including its errors.
 
-The SAD is the bridge between the requirements in the Software Requirements Specification (SRS v1.0) and the verification described in the Test Plan (Test Plan v1.0). Every design element is traced back to requirement IDs from `docs/requirements-registry.md` (`SCM-F-xxx`, `SCM-NF-xxx`, `SCM-SR-xxx`).
+The SAD is the bridge between the requirements in the Software Requirements Specification (SRS v1.1) and the verification described in the Test Plan (Test Plan v1.1). Every design element is traced back to requirement IDs from `docs/requirements-registry.md` (`SCM-F-xxx`, `SCM-NF-xxx`, `SCM-SR-xxx`).
 
-The architecture described here is the one **actually implemented and merged** on the `main` branch at commit `b3702ef`. All component, class, method, exception and file names match the source code in `src/scm_sim/`. This document follows the viewpoint-based approach of ISO/IEC/IEEE 42010:2011, adapted to the course template.
+The architecture described here is the implemented Sprint 2 design, including the deviations in `docs/deviations.md`. Component, class, method, exception and file names are checked against the source in `src/scm_sim/`. This document follows the viewpoint-based approach of ISO/IEC/IEEE 42010:2011, adapted to the course template.
 
 ### 1.2 Scope
 
@@ -76,10 +77,10 @@ The document covers:
 - The **static structure** of the system: seven components (Inventory, Order Manager, Shipment Manager, Analytics, Simulation Engine, CLI, CI Pipeline), the domain classes inside them, and their dependencies (§3.3, §3.4).
 - The **architecture pattern**, a layered, modular architecture inside one Python package, together with the alternatives that were rejected (§3.5).
 - The **dynamic behaviour** of one simulated day and two key scenarios, order fulfilment with back-ordering and detection of a delayed shipment, as UML sequence diagrams (§4.1, §4.2).
-- The **API design** of all five code components: signature, parameters, return value, exceptions and an example for every public call (§4.3).
+- The **API design** of the six code components: signature, parameters, return value, exceptions and an example for every public call (§4.3).
 - **Error handling**, the command-line **user experience**, **security architecture** (STRIDE) and **open issues** (§3.9, §4.4–§4.6).
 
-The following are outside the scope of this document, because the system does not have them: graphical or web user interfaces, databases or files used for storage, network services, user accounts and authentication. The development pipeline (GitHub, pull requests and GitHub Actions CI) is covered only where it supports the quality and security requirements.
+The following are outside the scope of this document, because the system does not have them: graphical or web user interfaces, databases or persistent scenario-state storage, network services, user accounts and authentication. The CLI may export daily metrics to a user-selected CSV file; this does not persist simulation state. The development pipeline (GitHub, pull requests and GitHub Actions CI) is covered only where it supports the quality and security requirements.
 
 ### 1.3 Intended Audience
 

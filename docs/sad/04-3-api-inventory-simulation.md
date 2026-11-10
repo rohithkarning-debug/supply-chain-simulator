@@ -301,7 +301,7 @@ KeyError: "Unknown warehouse: 'WH-EAST'"
 | Parameters | None |
 | Returns | The Analytics report for the new day, with keys `day`, `delayed_shipments`, `stockouts`, `low_stock`, `excess`, `orders`. The report is also appended to `history`, and a `DayLog` to `logs`. |
 | Raises | – (validation happens when the scenario is configured) |
-| Behaviour | Increments `day`, then: (1) `process_arrivals`; (2) create and `try_fulfil` today's scheduled orders; (3) `process_open`; (4) replenish each item needing a reorder with nothing in transit, trimmed to capacity; (5) `build_report`. |
+| Behaviour | Increments `day`, then: (1) `process_arrivals`; (2) `process_open` for older back-orders; (3) create and `try_fulfil` today's scheduled orders; (4) replenish each item needing a reorder with nothing in transit, trimmed to capacity; (5) `build_report`. |
 
 ```python
 >>> report = sim.step()
@@ -390,12 +390,21 @@ Day 3:
   flags: 0 delayed, 1 stockout, 0 low, 1 excess | fill rate 0.83
 ```
 
+**`metrics_rows`**
+
+| Field | Content |
+|---|---|
+| Signature | `metrics_rows(history: list[dict]) -> list[dict]` |
+| Parameters | Ordered daily report dictionaries, normally `Simulation.history` |
+| Returns | One flat row per report with `day`, `delayed`, `stockouts`, `low_stock`, `excess`, `pending`, `fulfilled`, `backordered`, `cancelled`, and `fill_rate` values |
+| Raises | Key/type errors if a supplied report is malformed |
+
 **Data types**
 
 | Type | Fields |
 |---|---|
 | `ScheduledOrder` (frozen dataclass) | `customer_id: str`, `warehouse_id: str`, `sku: str`, `quantity: int` |
-| `DayLog` (dataclass) | `day: int`, `delivered: list[Shipment]`, `fulfilled: list[Order]`, `backordered: list[Order]`, `backorders_filled: list[Order]`, `reorders: list[Shipment]` |
+| `DayLog` (dataclass) | `day: int`, `delivered: list[Shipment]`, `blocked: list[Shipment]`, `fulfilled: list[Order]`, `backordered: list[Order]`, `backorders_filled: list[Order]`, `reorders: list[Shipment]` |
 
 ##### CLI API (`scm_sim.__main__`)
 
@@ -403,15 +412,15 @@ Day 3:
 
 | Field | Content |
 |---|---|
-| Signature | `python -m scm_sim [-h] [--days DAYS] [--seed SEED]` (with `PYTHONPATH=src`, or run from `src/`) |
-| Parameters | `--days`: days to simulate, integer ≥ 1, default 10. `--seed`: random seed, integer, default 42. `-h`/`--help`: show usage and exit. |
-| Returns | Exit code 0; prints a header line, one block per day and the final report to standard output |
-| Raises | Usage error on standard error with exit code 2 if `--days < 1` or a value is not an integer |
+| Signature | `scm-sim [-h] [--days DAYS] [--seed SEED] [--summary] [--csv PATH]`; equivalent `python -m scm_sim ...` |
+| Parameters | `--days`: days to simulate, integer ≥ 1, default 10. `--seed`: random seed, integer, default 42. `--summary`: print the aggregate run summary. `--csv PATH`: write daily metrics to a CSV file with the documented ten-column header. `-h`/`--help`: show usage and exit. |
+| Returns | Exit code 0 on success; prints the daily log and final report, and optionally the run summary. If `--csv` is supplied, creates or overwrites the requested path. |
+| Raises | `argparse` usage error on standard error with exit code 2 for invalid arguments; file-system errors from writing the requested CSV path propagate. |
 
 ```
-$ PYTHONPATH=src python -m scm_sim --days 0
-usage: scm_sim [-h] [--days DAYS] [--seed SEED]
-scm_sim: error: --days must be at least 1
+$ scm-sim --days 0
+usage: scm-sim [-h] [--days DAYS] [--seed SEED] [--summary] [--csv PATH]
+scm-sim: error: --days must be at least 1
 ```
 
 **`main`**
@@ -421,23 +430,24 @@ scm_sim: error: --days must be at least 1
 | Signature | `main(argv: list[str] \| None = None) -> int` |
 | Parameters | `argv`: argument list; `None` reads `sys.argv` |
 | Returns | `0` on success |
-| Raises | `SystemExit(2)` on a usage error (raised by `argparse`) |
+| Raises | `SystemExit(2)` on an argument usage error (raised by `argparse`); CSV file errors are not converted into usage errors. |
 
 ```python
 >>> from scm_sim.__main__ import main
 >>> main(["--days", "1", "--seed", "42"])
 Supply Chain Simulator demo: 1 day(s), seed 42
-<BLANKLINE>
+
 Day 1:
   fulfilled ORD-0001: 30 WIDGET from WH-NORTH
   fulfilled ORD-0002: 25 WIDGET from WH-SOUTH
   flags: 0 delayed, 0 stockout, 0 low, 1 excess | fill rate 1.0
-<BLANKLINE>
+
 === Supply Chain Report: Day 1 ===
-<BLANKLINE>
+
 Delayed shipments (0)
   No issues
-<BLANKLINE>
+
+...
 Stockouts (0)
   No issues
 <BLANKLINE>

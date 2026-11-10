@@ -4,16 +4,17 @@
 | Field | Value |
 |---|---|
 | Project | Supply Chain Management Simulator |
-| Version | 1.0 |
-| Authors | Team NN – Rohith Karning, Rohanth Ganesha C, Rishi J Mule, Pranav Achar |
-| Date | 11-10-2026 |
-| Status | Draft |
+| Version | 1.1 |
+| Authors | Team 02 – Rohith Karning, Rohanth Ganesha C, Rishi J Mule, Pranav Achar |
+| Date | 09-11-2026 |
+| Status | Final (pending approval) |
 
 ### Revision History
 
 | Version | Date | Author(s) | Description of change | Approval |
 |---|---|---|---|---|
-| 1.0 | 11-10-2026 | Team NN | Initial draft | Pending |
+| 1.1 | 09-11-2026 | Team 02 | Updated for Sprint 1 and 2 changes and final documentation audit (see `docs/deviations.md`) | Pending |
+| 1.0 | 11-10-2026 | Team 02 | Initial draft | Pending |
 
 ### Table of Contents
 
@@ -42,16 +43,16 @@ Appendix: Test Cases (TC-INV-01, TC-INV-02, TC-SIM-01, TC-SIM-02, TC-ORD-01, TC-
 
 ### 1.1 Purpose
 
-This Test Plan describes how the **Supply Chain Management Simulator** (Python package `scm_sim`), version 1.0, is verified against its Software Requirements Specification. It defines what is tested and what is not, the test levels and techniques used, the environment, the schedule, the people responsible, the entry, exit, suspension and resumption criteria, and how results are recorded and traced back to requirements.
+This Test Plan describes how the **Supply Chain Management Simulator** (Python package `scm_sim`), version 1.1, is verified against its Software Requirements Specification. It defines what is tested and what is not, the test levels and techniques used, the environment, the schedule, the people responsible, the entry, exit, suspension and resumption criteria, and how results are recorded and traced back to requirements.
 
 The plan has two goals:
 
-1. To show that every functional requirement (SCM-F-001 to SCM-F-043), non-functional requirement (SCM-NF-001 to SCM-NF-005) and security requirement (SCM-SR-001 to SCM-SR-007) in the SRS is covered by at least one test case.
-2. To give evaluators and team members a repeatable procedure: each automated test case names the pytest tests that implement it, so anyone can re-run them with `pytest -v --cov=scm_sim` and get the same result.
+1. To show that every functional requirement (SCM-F-001 to SCM-F-044), non-functional requirement (SCM-NF-001 to SCM-NF-005) and security requirement (SCM-SR-001 to SCM-SR-007) in the SRS is covered by at least one test case.
+2. To give evaluators and team members a repeatable procedure: each automated test case names the pytest tests that implement it, so anyone can re-run them with `python -m pytest -v --cov=scm_sim --cov-branch`.
 
 ### 1.2 Scope
 
-**In scope.** The plan covers the seven test items listed in §2 at commit `b3702ef` of the `main` branch: the Inventory, Order Manager, Shipment Manager, Analytics, Simulation Engine and CLI components, and the CI Pipeline. It includes:
+**In scope.** The plan covers the seven test items listed in §2: the Inventory, Order Manager, Shipment Manager, Analytics, Simulation Engine and CLI components, and the CI Pipeline. The simulator is installable as a package and exposes both `scm-sim` and `python -m scm_sim`. It includes:
 
 - **Unit testing** of each module through its own test file in `tests/`.
 - **Integration testing** of the modules working together in the Simulation Engine (`tests/test_simulator.py`).
@@ -60,7 +61,7 @@ The plan has two goals:
 - **Non-functional testing**: performance (SCM-NF-001), reproducibility (SCM-NF-002), coverage and maintainability (SCM-NF-003), portability (SCM-NF-004) and usability (SCM-NF-005).
 - **Security validation** of data-integrity requirements (input validation, invariants, guarded status changes, unknown-ID rejection, copies of returned data) and of the development process (branch protection, no secrets, no runtime dependencies).
 
-The plan contains **15 test cases**. Eleven are fully automated and run on every push and pull request by the CI `test` job. TC-PERF-01 and TC-SEC-02 are manual, and TC-COV-01 and TC-REP-01 combine automated checks with a manual part.
+The plan contains **15 test cases**. Eleven are fully automated and run in the CI `test` job. TC-PERF-01 and TC-SEC-02 are manual, and TC-COV-01 and TC-REP-01 combine automated checks with a manual part. The final unit-test report records 100 automated tests passed; the combined line and branch coverage evidence is 99.66%. TC-COV-01 remains partially validated because macOS was not tested.
 
 **Out of scope.** The features listed in §4 are not tested, including the Python interpreter and standard library, pytest and GitHub Actions themselves, and functions the system does not provide (graphical or web interfaces, storage, networking).
 
@@ -68,12 +69,12 @@ The plan contains **15 test cases**. Eleven are fully automated and run on every
 
 | ID | Document | Version / Date |
 |---|---|---|
-| [SRS] | Software Requirements Specification: Supply Chain Management Simulator | 1.0, 11-10-2026 |
-| [SAD] | Software Architecture Document: Supply Chain Management Simulator | 1.0, 11-10-2026 |
+| [SRS] | Software Requirements Specification: Supply Chain Management Simulator | 1.1, 09-11-2026 |
+| [SAD] | Software Architecture Document: Supply Chain Management Simulator | 1.1, 09-11-2026 |
 | [REG] | Requirements registry, `docs/requirements-registry.md` | 11-10-2026 |
 | [IEEE829] | IEEE Std 829-2008, Standard for Software and System Test Documentation | 2008 |
 | [IEEE29119] | ISO/IEC/IEEE 29119-3, Software Testing: Test Documentation | 2021 |
-| [REPO] | Team repository, https://github.com/rohithkarning-debug/supply-chain-simulator (`README.md`, `tests/`, `.github/workflows/ci.yml`) | commit `b3702ef` |
+| [REPO] | Team repository, https://github.com/rohithkarning-debug/supply-chain-simulator (`README.md`, `tests/`, `.github/workflows/ci.yml`) | Final Sprint 2 implementation; see dated evidence reports in `docs/test-reports/` |
 | [PYTEST] | pytest documentation, https://docs.pytest.org | pytest ≥ 8.0 |
 | [PYCOV] | pytest-cov documentation, https://pytest-cov.readthedocs.io | pytest-cov ≥ 5.0 |
 
@@ -88,7 +89,7 @@ The plan contains **15 test cases**. Eleven are fully automated and run on every
 | **Unit / Integration / System / Acceptance test** | Testing one module on its own / modules working together / the whole program through its CLI / the demo run against the problem statement |
 | **Boundary-value testing** | Testing at and just beyond a limit, e.g. stock levels 20 and 21 for a reorder point of 20 |
 | **Regression testing** | Re-running the whole suite after every change to detect newly broken behaviour; done automatically by CI on every pull request |
-| **Coverage** | The percentage of executable lines of `scm_sim` run by the test suite, measured by pytest-cov |
+| **Coverage** | Line coverage and branch coverage of `scm_sim`, measured by pytest-cov; the CI gate measures combined line and branch coverage |
 | **CI run** | One execution of the GitHub Actions workflow `CI` (job `test`) |
 | **Entry / Exit criteria** | Conditions that must hold before testing starts / before testing is considered complete |
 | **Defect** | A difference between actual and expected results, recorded as a GitHub Issue |

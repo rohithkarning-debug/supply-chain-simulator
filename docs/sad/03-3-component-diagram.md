@@ -12,12 +12,12 @@ This section gives two static views of the system: the **component view**, which
 
 | Component | File | Layer | Owner | Requirements |
 |---|---|---|---|---|
-| CLI | `src/scm_sim/__main__.py` | Presentation | Rohith | SCM-F-043, SCM-NF-005 |
-| Simulation Engine | `src/scm_sim/simulator.py` | Orchestration | Rohith | SCM-F-040, SCM-F-041, SCM-F-042 |
+| CLI | `src/scm_sim/__main__.py` | Presentation | Rohith | SCM-F-043, SCM-F-044; supports SCM-F-034, SCM-NF-005 |
+| Simulation Engine | `src/scm_sim/simulator.py` | Orchestration | Rohith | SCM-F-040 – SCM-F-042; supports SCM-F-044 |
 | Inventory | `src/scm_sim/inventory.py` | Domain | Rohith | SCM-F-001 – SCM-F-004 |
 | Order Manager | `src/scm_sim/orders.py` | Domain | Rohanth | SCM-F-010 – SCM-F-013 |
 | Shipment Manager | `src/scm_sim/shipments.py` | Domain | Rishi | SCM-F-020 – SCM-F-023 |
-| Analytics | `src/scm_sim/analytics.py` | Analytics | Pranav | SCM-F-030 – SCM-F-033 |
+| Analytics | `src/scm_sim/analytics.py` | Analytics | Pranav | SCM-F-030 – SCM-F-034 |
 | CI Pipeline | `.github/workflows/ci.yml` | Development infrastructure | Rohith | SCM-NF-003, SCM-SR-005 |
 
 **Dependencies (solid arrows: "uses / calls")**
@@ -25,15 +25,15 @@ This section gives two static views of the system: the **component view**, which
 | From | To | Interface used | Purpose |
 |---|---|---|---|
 | Analyst / Instructor | CLI | `python -m scm_sim --days N --seed S` | Run the demo |
-| CLI | Simulation Engine | `build_demo(seed)`, `Simulation.run(days)`, `Simulation.logs`, `Simulation.final_summary()`, `describe_day()` | Build the scenario, run it, print the log and report |
+| CLI | Simulation Engine | `build_demo(seed)`, `Simulation.run(days)`, `Simulation.logs`, `Simulation.final_summary()`, `metrics_rows(history)`, `describe_day()` | Build the scenario, run it, print the log and report, and prepare daily CSV rows |
 | Simulation Engine | Inventory | `register_warehouse`, `set_policy`, `add`, `reorder_suggestions`, `total_in_warehouse`, `snapshot` | Set-up, replenishment decisions, report input |
 | Simulation Engine | Order Manager | `create`, `try_fulfil`, `process_open`, `by_status` | Serve today's demand, retry back-orders, collect orders for the report |
 | Simulation Engine | Shipment Manager | `add_supplier`, `dispatch`, `process_arrivals`, `in_transit`, `delayed` | Register suppliers, replenish, deliver arrivals, collect late shipments |
-| Simulation Engine | Analytics | `build_report`, `format_report` | Build each day's report and the final summary |
+| Simulation Engine | Analytics | `build_report`, `format_report`, `summarize_run`, `format_run_summary` | Build daily reports and aggregate the final run summary |
 | Order Manager | Inventory | `level`, `remove` | Check and take stock when fulfilling |
 | Shipment Manager | Inventory | `add` | Put arriving goods into stock |
 | Developer | CI Pipeline | `git push` / pull request | Trigger the `test` job |
-| CI Pipeline | `tests/` | `pytest -v --cov=scm_sim` | Run the whole suite and measure coverage |
+| CI Pipeline | `tests/` | `pytest -v --cov=scm_sim --cov-branch --cov-fail-under=90` | Run the whole suite and enforce the line-coverage gate while measuring branches |
 
 Dashed arrows labelled `<<tests>>` show that the pytest suite in `tests/` exercises every code component: `test_inventory.py`, `test_orders.py`, `test_shipments.py` and `test_analytics.py` test their modules on their own, and `test_simulator.py` tests the Simulation Engine and the CLI end to end.
 

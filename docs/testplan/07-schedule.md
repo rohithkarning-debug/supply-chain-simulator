@@ -1,6 +1,6 @@
 ## 7. Test Schedule
 
-Testing runs alongside development. Automated tests were written together with each feature and ran in CI on every pull request; the remaining work is the manual test cases and the final test summary. All dates are in 2026 (DD-MM-YYYY).
+Testing runs alongside development. Automated tests were written with each feature and run in CI on pull requests and pushes to `main`. Sections 7.1–7.3 preserve the original baseline plan; §7.4 records the actual schedule and current status. All dates are in 2026 (DD-MM-YYYY).
 
 ### 7.1 Schedule of Test Activities
 
@@ -9,22 +9,22 @@ Testing runs alongside development. Automated tests were written together with e
 | 1 | Set up test environment: `requirements.txt` (pytest, pytest-cov), `pytest.ini`, CI workflow `.github/workflows/ci.yml` (job `test`) | 10-10-2026 | 10-10-2026 | Rohith | **M1: environment and CI ready.** First CI run (#1) green | Done |
 | 2 | Write unit tests with each feature, run locally and in CI on every PR | 10-10-2026 | 11-10-2026 | Each module owner | `test_inventory.py`, `test_orders.py`, `test_shipments.py`, `test_analytics.py` | Done |
 | 3 | Automated execution on feature PRs: #2 orders, #3 inventory policies, #5 shipments, #6 analytics | 10-10-2026 | 11-10-2026 | Each PR author; reviewer checks CI | `test` check green before each merge | Done |
-| 4 | Integration and system tests for the Simulation Engine and CLI (PR #7) | 11-10-2026 | 11-10-2026 | Rohith | `test_simulator.py`; **M2: full suite on `main`.** CI run #20 on commit `b3702ef`: 73 passed, 97% coverage | Done |
-| 5 | Test design: write the 15 test-case specifications and this Test Plan | 11-10-2026 | 12-10-2026 | All (see §9) | `docs/testplan/` and `docs/testplan/test-cases/`; **M3: Test Plan v1.0 submitted** (docs deadline 12-10-2026) | In progress |
-| 6 | Manual test cases: TC-PERF-01, TC-SEC-02, the manual part of TC-COV-01 (Windows + Linux run) and of TC-REP-01 (CLI output comparison) | 13-10-2026 | 20-10-2026 | Rohanth (PERF), Rohith (SEC-02), Pranav (COV, REP) | Actual results recorded in each test-case file; **M4: all 15 TCs executed** | Not started |
-| 7 | Defect fixing and re-testing for any failures from activity 6 | 13-10-2026 | 22-10-2026 | Owner of the affected module | Fix PRs with green CI; defect issues closed | Not started |
+| 4 | Integration and system tests for the Simulation Engine and CLI (PR #7) | 11-10-2026 | 11-10-2026 | Rohith | `test_simulator.py`; M2 baseline suite completed (historical; see final evidence in `docs/test-reports/`) | Done |
+| 5 | Test design: write the 15 test-case specifications and this Test Plan | 11-10-2026 | 12-10-2026 | All (see §9) | `docs/testplan/` and `docs/testplan/test-cases/`; **M3: Test Plan v1.0 submitted** (docs deadline 12-10-2026) | Done |
+| 6 | Manual test cases: TC-PERF-01, TC-SEC-02, and manual parts of TC-COV-01 / TC-REP-01 | 13-10-2026 | 20-10-2026 | Rohanth (PERF), Rohith (SEC-02), Pranav (COV, REP) | Results recorded; Windows and Linux tested, macOS not tested, so SCM-NF-004 remains partial | Done (with macOS portability outstanding) |
+| 7 | Defect fixing and re-testing for any failures from activity 6 | 13-10-2026 | 22-10-2026 | Owner of the affected module | No failing test results were reported; no defect-fix cycle was required | Not required |
 | 8 | Regression testing: full suite re-run by CI on every later PR and every push to `main` | 10-10-2026 | End of project | Automatic (CI); PR reviewer verifies | Green `test` check on each PR | Ongoing |
-| 9 | Test summary report: metrics from §14, defect summary and exit-criteria check | 23-10-2026 | 25-10-2026 | Rohanth (QA Lead) with Rohith | **M5: test summary report** | Not started |
+| 9 | Test summary report: metrics from §14, defect summary and exit-criteria check | 23-10-2026 | 09-11-2026 | Rohanth (QA Lead) with Rohith | Metrics and test reports recorded; final System Validation Report merged by PR #89 | Done |
 
 ### 7.2 Milestones
 
 | Milestone | Date | Criterion |
 |---|---|---|
 | M1 – Environment and CI ready | 10-10-2026 | CI workflow merged; first run green |
-| M2 – Full automated suite on `main` | 11-10-2026 | All feature PRs merged; CI run #20 on `b3702ef` green (73 passed, 97% coverage) |
+| M2 – Initial automated baseline on `main` | 11-10-2026 | Baseline at `b3702ef`; CI run #20 green (73 passed, 97% coverage). Final suite evidence is in `docs/test-reports/`. |
 | M3 – Test Plan v1.0 submitted | 12-10-2026 | All Test Plan sections and 15 test-case files merged to `main` |
-| M4 – All test cases executed | 20-10-2026 | Every TC has an actual result of Pass or Fail (none "Not run") |
-| M5 – Test summary report | 25-10-2026 | Exit criteria in §5 checked and reported |
+| M4 – Test case execution recorded | 20-10-2026 | All 15 test cases have recorded results; TC-COV-01 is partial because macOS was not tested |
+| M5 – Final system validation report | 09-11-2026 | Rishi's final report with E1–E6 was merged in PR #89; its requirement matrix is reconciled to SCM-F-034, SCM-F-043 and SCM-F-044 |
 
 ### 7.3 Dependencies of the Schedule
 
@@ -39,6 +39,5 @@ Testing runs alongside development. Automated tests were written together with e
 |---|---|---|---|---|
 | Sprint 1 | 01-11-2026 | 06-11-2026 | Packaging, order ID validation (#68), back-orders first (#69), arrivals overflow fix (#70), per-item thresholds (#71), Sprint 1 video (#75) | Done |
 | Testing week | 02-11-2026 | 06-11-2026 | v1 test reports; manual test cases TC-REP-01, TC-PERF-01, and TC-SEC-02 executed and passed on 05-11-2026 | Done |
-| Sprint 2 | 07-11-2026 | 09-11-2026 | Run summary (#79), CSV export (#80), coverage gap tests (#81, #84), test cases update (#83), CI report workflows (#82), final reports on 09-11-2026 | Done |
-| Release v1.0 | 09-11-2026 | 09-11-2026 | Final System Validation Report, Deviations Document, 100% test pass rate, release freeze | Done |
-
+| Sprint 2 | 07-11-2026 | 09-11-2026 | Run summary (#79), CSV export (#80), coverage gap tests (#81, #84), test case updates (#83), CI report workflows (#82), unit and coverage reports | Done |
+| Release v1.0 | 09-11-2026 | Pending | Deviations and final test/coverage/system-validation evidence are available; GitHub release/freeze issue #58 and Sprint 2 demo video issue #57 remain open | In progress |
