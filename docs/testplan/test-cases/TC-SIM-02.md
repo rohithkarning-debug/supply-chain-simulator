@@ -1,4 +1,4 @@
-﻿| Field | Content |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-SIM-02 |
 | **Title** | System-Level Scenario Validation, Multi-Issue Detection, and CLI Execution |
@@ -11,7 +11,7 @@
 | **Expected result** | `schedule_order` rejects non-future days and unknown warehouses; the 10-day demo scenario successfully triggers and reports delayed shipments, stockouts, back-ordered orders, and excess inventory; CLI executes cleanly with exit code 0; installed `scm-sim` runs; `--summary` prints run metrics; `--csv` writes header and daily rows; `--days 0` exits with code 2 and usage error; `--help` documentation displays all available options (`--days`, `--seed`, `--summary`, `--csv`). |
 | **Pass/fail criteria** | **Pass** if all system features execute without failure, all four issue types are detected in reports, and CLI execution with `--summary` and `--csv` succeeds with exit code 0; **Fail** if exceptions are unhandled, issues go undetected, or CLI execution crashes. |
 | **Automated by** | `tests/test_simulator.py::test_schedule_order_validates_input`<br>`tests/test_simulator.py::test_demo_detects_delay_stockout_backorder_and_excess`<br>`tests/test_simulator.py::test_cli_main_runs`<br>`tests/test_simulator.py::test_cli_main_summary_flag`<br>`tests/test_simulator.py::test_metrics_rows_has_one_flat_row_per_day`<br>`tests/test_simulator.py::test_cli_csv_export`<br>`tests/test_simulator.py::test_cli_csv_and_summary_flags`<br>`tests/test_simulator.py::test_cli_rejects_zero_days`<br>`tests/test_simulator.py::test_cli_runs_as_module`<br>`tests/test_packaging.py::test_installed_scm_sim_command_runs`<br>`tests/test_packaging.py::test_pyproject_declares_scm_sim_console_script`<br>`tests/test_packaging.py::test_package_has_no_runtime_dependencies` |
-| **Actual result** | Pass (97 tests; commit f91dd71) |
+| **Actual result** | Pass (100 tests; commit 2f6d382) |
 | **Status** | Passed |
 
-Updated 08-11-2026: updated CLI steps and automated tests for scm-sim, --summary (#79) and --csv (#54) (#62)
+Updated 10-11-2026: updated CLI steps and automated tests for scm-sim, --summary (#79) and --csv (#54), verified on final main (100 tests, commit 2f6d382)

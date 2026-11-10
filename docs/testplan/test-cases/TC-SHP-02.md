@@ -1,4 +1,4 @@
-﻿| Field | Content |
+| Field | Content |
 | :--- | :--- |
 | **TC ID** | TC-SHP-02 |
 | **Title** | Stochastic Delay Modeling, Inbound Physical Receiving, and Delay Detection |
@@ -11,7 +11,7 @@
 | **Expected result** | On-time shipments deliver on expected day, incrementing inventory and setting status `DELIVERED`; delayed shipments do not arrive early; `delayed()` flags in-transit late shipments on day 4 and delivered late shipments on day 5; reliability 1.0 never delays; reliability 0.0 experiences delays in {1, 2, 3}. An arrival that would exceed warehouse capacity remains `IN_TRANSIT` with stock unchanged, is recorded in `last_blocked`, shows as `BLOCKED` in the day log, does not abort other arrivals, and is delivered once space frees up. |
 | **Pass/fail criteria** | **Pass** if stock is updated solely via `inventory.add()`, arrival timing is strictly respected, all delay calculations evaluate correctly, and overflowing arrivals stay in transit without blocking other deliveries; **Fail** if premature delivery occurs, inventory is corrupted, or delays are miscalculated. |
 | **Automated by** | `tests/test_shipments.py::test_on_time_arrival_adds_stock`<br>`tests/test_shipments.py::test_delayed_shipment_not_delivered_early`<br>`tests/test_shipments.py::test_delayed_detection_both_in_transit_late_and_delivered_late`<br>`tests/test_shipments.py::test_reliability_one_means_never_delayed`<br>`tests/test_shipments.py::test_probabilistic_delay_with_zero_reliability`<br>`tests/test_shipments.py::test_capacity_breach_does_not_abort_other_arrivals`<br>`tests/test_simulator.py::test_blocked_arrival_is_logged_and_delivered_once_space_frees` |
-| **Actual result** | Pass (97 tests; commit f91dd71) |
+| **Actual result** | Pass (100 tests; commit 2f6d382) |
 | **Status** | Passed |
 
-Updated 08-11-2026: documented non-aborting arrivals when exceeding warehouse capacity (#70) (#62)
+Updated 10-11-2026: documented non-aborting arrivals when exceeding warehouse capacity (#70), verified on final main (100 tests, commit 2f6d382)
