@@ -11,7 +11,12 @@ import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-from scm_sim.analytics import build_report, format_report
+from scm_sim.analytics import (
+    build_report,
+    format_report,
+    format_run_summary,
+    summarize_run,
+)
 from scm_sim.inventory import Inventory, StockPolicy
 from scm_sim.orders import Order, OrderManager, OrderStatus
 from scm_sim.shipments import Shipment, ShipmentManager, Supplier
@@ -177,6 +182,10 @@ class Simulation:
         """Return the latest report formatted by analytics' ``format_report``."""
         report = self.history[-1] if self.history else self._build_report(self.day)
         return format_report(report)
+
+    def run_summary(self) -> str:
+        """Return the multi-day run summary formatted as text."""
+        return format_run_summary(summarize_run(self.history))
 
     def all_orders(self) -> List[Order]:
         """Return every order ever created, in ID order."""

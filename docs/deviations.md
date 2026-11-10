@@ -20,6 +20,13 @@ This document lists every change made during Sprint 1 and Sprint 2 compared with
 | D12 | Process | Direct board transitions | Sprint 1 cards went from Todo straight to Done; In Progress was used from Sprint 2 | Improved sprint tracking | S1 | all |
 | D13 | Process | Normal PR integration workflow | The #55 CI change first reached main while resolving a merge conflict in PR #80 (commit f005900); PR #82 then closed the issue | Merge conflict resolution on main | S2 | Rohith |
 
+## Sections Without Deviations
+
+The following specification sections were implemented exactly as originally designed with no deviations:
+- **Inventory Module (SCM-F-001 – SCM-F-004):** Warehouse stock tracking, capacity validation, per-item policy definitions, reorder calculations, and immutable defensive snapshot operations match the SRS and SAD designs without alteration.
+- **Security & Domain Invariants (SCM-SR-001 – SCM-SR-007, SCM-SO-1, SCM-SO-2):** Public boundary validation before mutation, non-negative stock guards, warehouse capacity limits, strict order status state-machine transitions, unknown entity KeyError exceptions, and data isolation follow the original security architecture without changes.
+- **Architectural Patterns (SAD §3.5):** Layered domain model architecture, dependency structure, and pure-function analytics design operate exactly as specified.
+
 ## Impact on the documents
 
 SRS 4.2, 4.3, 4.4, 4.5 and 2.5 and SAD 4.6 are updated in #31; the test cases are updated in #59, #60, #61 and #62.

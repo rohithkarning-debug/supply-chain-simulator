@@ -47,6 +47,18 @@ from the source tree with `PYTHONPATH=src python -m scm_sim` (bash) or
 `--days` (default 10) sets how long to simulate; `--seed` (default 42) fixes the random
 shipment delays, so the same seed always gives the same output.
 
+Use `--summary` to print an aggregated run summary over all simulated days:
+
+```bash
+scm-sim --days 10 --seed 42 --summary
+```
+
+Use `--csv PATH` to export daily metrics to a CSV file for spreadsheet analysis:
+
+```bash
+scm-sim --days 10 --seed 42 --csv metrics.csv
+```
+
 ### Sample output (abridged)
 
 ```text
@@ -89,6 +101,15 @@ Excess (1)
 Orders (14)
   pending 0, fulfilled 14, backordered 0, cancelled 0
   fill rate: 1.0
+
+=== Run Summary ===
+  days: 10
+  days_with_delays: 6
+  days_with_stockouts: 3
+  days_with_low_stock: 3
+  days_with_excess: 10
+  peak_delayed: 2
+  final_fill_rate: 1.0
 ```
 
 ## Architecture

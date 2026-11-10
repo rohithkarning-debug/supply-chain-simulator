@@ -315,3 +315,12 @@ def test_order_metrics_unknown_status():
     assert m["backordered"] == 0
     assert m["cancelled"] == 0
     assert m["fill_rate"] == 0.5
+
+
+def test_summarize_history_and_format_summary_aliases():
+    """Verify backward compatibility aliases for summarize_history and format_summary."""
+    from scm_sim.analytics import format_summary, summarize_history
+
+    assert summarize_history is summarize_run
+    assert format_summary is format_run_summary
+
