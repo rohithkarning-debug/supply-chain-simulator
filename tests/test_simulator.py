@@ -287,3 +287,14 @@ def test_report_uses_per_item_policy_thresholds():
     report = sim.step()
     assert ("WH", "FAST", 40) in report["low_stock"]
     assert ("WH", "BULK", 40, 10) in report["excess"]
+
+
+def test_simulation_run_summary():
+    """Verify that Simulation.run_summary() produces formatted run summary."""
+    sim = build_demo(seed=42)
+    sim.run(3)
+    text = sim.run_summary()
+    assert "=== Run Summary ===" in text
+    assert "days: 3" in text
+    assert "final_fill_rate: 0.83" in text
+
