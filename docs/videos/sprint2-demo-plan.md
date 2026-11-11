@@ -6,7 +6,7 @@
 | Target File | `docs/videos/sprint2-demo.mp4` |
 | Presenter | Rishi J Mule (Security Test Engineer, Team 02) |
 | Target Duration | ~120 seconds (2:00) |
-| Status | **Pending Actual User Screen Recording** (Automated sandbox lacks physical display/recording hardware; synthetic/mock MP4 generation is strictly prohibited per prompt rules) |
+| Status | **Recorded & Uploaded** (`docs/videos/sprint2-demo.mp4`, 7.6 MB) |
 
 ---
 
